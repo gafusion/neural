@@ -5,11 +5,11 @@ Engine for neural-network based pedestal predictions
 
 Getting started
 ---------------
-Run NEUPED with::
+Run NEUPED with:
     
     neuped model_name input_run_file
 
-For example::
+For example:
 
     neuped EPED1_D3D samples/EPED1_D3D/input.dat
 
@@ -28,14 +28,14 @@ Possible `model_name` are: `EPED1_D3D`, `EPED1_ITERbaseline`
 Inputs format
 -------------
 Notice that the `sample` directory contains samples of the `input_run_file` for each of the models.
-The `input_run_file` has the format of::
+The `input_run_file` has the format of:
 
     N1
     i1 i2 i3 i4 i5 i6 i7 i8 i9
     i1 i2 i3 i4 i5 i6 i7 i8 i9
     ...
 
-where::
+where:
 
     N1 number of runs
     i.. inputs (N1 lines)
@@ -44,7 +44,7 @@ Outputs format
 --------------
 Upon run the `output_avg.dat` and `output_std.dat` files will be generated in the
 current working directory with the NEUPED prediction and its standard deviation.
-Both files have format::
+Both files have format:
 
     N1
     o1 o2 o3 o4
@@ -52,6 +52,7 @@ Both files have format::
     ...
 
 where::
+
     N1 number of runs
     o.. outputs (N1 lines)
 
