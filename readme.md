@@ -1,20 +1,20 @@
-NEUPED - engine for neural-network based pedestal predictions
-=============================================================
+NEUPED
+======
 
-===============
-getting started
-===============
+Engine for neural-network based pedestal predictions
+
+Getting started
+---------------
 Run NEUPED with::
     
     neuped model_name input_run_file
 
 For example::
 
-    ./neuped EPED1_D3D samples/EPED1_D3D/input.dat
+    neuped EPED1_D3D samples/EPED1_D3D/input.dat
 
-===============
-pedestal models
-===============
+Pedestal models
+---------------
 Possible `model_name` are: `EPED1_D3D`, `EPED1_ITERbaseline`
 
 * EPED1_D3D
@@ -25,9 +25,8 @@ Possible `model_name` are: `EPED1_D3D`, `EPED1_ITERbaseline`
  * input_names = 'betan' 'delta' 'kappa' 'neped' 'zeffped'
  * output_names = 'OUT_p_E1' 'OUT_ptop_E1' 'OUT_wid_E1' 'OUT_widtop_E1'
 
-=============
-inputs format
-=============
+Inputs format
+-------------
 Notice that the `sample` directory contains samples of the `input_run_file` for each of the models.
 The `input_run_file` has the format of::
 
@@ -41,9 +40,8 @@ where::
     N1 number of runs
     i.. inputs (N1 lines)
 
-==============
-outputs format
-==============
+Outputs format
+--------------
 Upon run the `output_avg.dat` and `output_std.dat` files will be generated in the
 current working directory with the NEUPED prediction and its standard deviation.
 Both files have format::
@@ -57,9 +55,8 @@ where::
     N1 number of runs
     o.. outputs (N1 lines)
 
-============
-installation
-============
-* clone and cmake install the FANN library: `git@github.com:libfann/fann.git`
+Installation
+------------
+* Clone and cmake install the FANN library: `git@github.com:libfann/fann.git`
 
-* modify and run ./compile.sh script
+* Modify and run ./compile.sh script
