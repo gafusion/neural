@@ -43,10 +43,8 @@ int main(int argc, char *argv[])
     	for(i = 0; i < num_data; i++){
 		    for(j = 0; j < ann->num_input; j++){
 			    fscanf(fp1, FANNSCANF " ", &data_avg->input[i][j]);
-			    printf("%d %d %d %f\n",i,j,ann->num_input,data_avg->input[i][j]);
 			    data_std->input[i][j]=data_avg->input[i][j];
 			}
-			printf("\n");
             for(j = 0; j < ann->num_output; j++){
 			    data_avg->output[i][j]=0.;
 			    data_std->output[i][j]=0.;
