@@ -4,13 +4,11 @@ NEUPED - engine for neural-network based pedestal predictions
 ===============
 getting started
 ===============
-.1 get, make, make install of the FANN library: git@github.com:libfann/fann.git
-.2 run ./compile.sh script
-.3 run NEUPED with::
+Run NEUPED with::
     
     neuped model_name input_run_file
 
-for example::
+For example::
 
     ./neuped EPED1_D3D samples/EPED1_D3D/input.dat
 
@@ -59,4 +57,9 @@ where::
     N1 number of runs
     o.. outputs (N1 lines)
 
+============
+installation
+============
+* clone and cmake install the FANN library: `git@github.com:libfann/fann.git`
 
+* modify and run ./compile.sh script
