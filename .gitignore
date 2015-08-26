@@ -1,3 +1,5 @@
 OMFITsave.txt
 *.exe
 *~
+./output_avg.dat
+./output_std.dat

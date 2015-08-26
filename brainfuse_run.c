@@ -13,32 +13,13 @@ int main(int argc, char *argv[])
     }
 
   // Read in input parameters
-  unsigned int i,j,n;
-  struct fann* ann;
-  const char* annFile;
-  const char* runFile = argv[argc-1];
+  unsigned int i,j,n,num_data;
+  struct fann *ann;
+  const char *annFile;
+  const char *runFile = argv[argc-1];
   struct fann_train_data *data_avg, *data_std;
   fann_type *calc_out;
-
-  // Read data
-  printf("Reading data from file %s\n", runFile);
-  data_avg = fann_read_train_from_file(runFile);
-  if(data_avg == NULL){
-      printf("Invalid data file %s\n", runFile);
-      return -1;
-  }
-  data_std = fann_create_train(data_avg->num_data, data_avg->num_input, data_avg->num_output);
-  
-  //zero
-  for(i = 0; i != data_avg->num_data; i++){
-    for(j = 0; j != data_avg->num_output; j++){
-      data_avg->output[i][j]=0;
-      data_std->output[i][j]=0;
-    }
-    for(j = 0; j != data_avg->num_input; j++){
-        data_std->input[i][j]=data_avg->input[i][j];
-    }
-  }
+  FILE *fp1, *fp2;
 
   // Run
   for (n = 1; n < argc-1; n++){
@@ -50,7 +31,30 @@ int main(int argc, char *argv[])
         return -1;
         printf("Invalid network file %s\n", annFile);
       }
-      
+
+    if (n==1){
+        // Read input data
+        printf("Reading data from file %s: ", runFile);
+        fp1 = fopen(runFile, "r");
+        fscanf(fp1, "%u\n", &num_data);
+        printf("%u runs %d inputs %d ouputs\n", num_data, ann->num_input, ann->num_output);
+        data_avg = fann_create_train(num_data, ann->num_input, ann->num_output);
+        data_std = fann_create_train(num_data, ann->num_input, ann->num_output);
+    	for(i = 0; i < num_data; i++){
+		    for(j = 0; j < ann->num_input; j++){
+			    fscanf(fp1, FANNSCANF " ", &data_avg->input[i][j]);
+			    printf("%d %d %d %f\n",i,j,ann->num_input,data_avg->input[i][j]);
+			    data_std->input[i][j]=data_avg->input[i][j];
+			}
+			printf("\n");
+            for(j = 0; j < ann->num_output; j++){
+			    data_avg->output[i][j]=0.;
+			    data_std->output[i][j]=0.;
+			}
+		}
+	    fclose(fp1);
+     }
+
      for(i = 0; i != data_avg->num_data; i++){
         fann_scale_input( ann, data_avg->input[i] );
         calc_out = fann_run( ann, data_avg->input[i] );
@@ -73,18 +77,24 @@ int main(int argc, char *argv[])
       }
   }
 
-  // print
+  // print and write
+  fp1 = fopen("output_avg.dat", "w");
+  fp2 = fopen("output_std.dat", "w");
+  fprintf(fp1,"%u\n",num_data);
+  fprintf(fp2,"%u\n",num_data);
   for(i = 0; i != data_avg->num_data; i++){
       printf("Run %d: ",i);
       for(j = 0; j != data_avg->num_output; j++){
           printf("%f (%f) ",data_avg->output[i][j],data_std->output[i][j]);
+          fprintf(fp1,"%f ",data_avg->output[i][j]);
+          fprintf(fp2,"%f ",data_std->output[i][j]);
       }
       printf("\n");
+      fprintf(fp1,"\n");
+      fprintf(fp2,"\n");
   }
 
-  // dump outputs
-  fann_save_train(data_avg,"output_avg.dat");
-  fann_save_train(data_std,"output_std.dat");
-
+  fclose(fp1);
+  fclose(fp2);
   return 0;
 }

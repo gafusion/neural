@@ -12,4 +12,4 @@ popd  > /dev/null
 
 echo "./brainfuse_run.exe $NEUPED_ROOT/models/$1/brainfuse_* $2"
 
-./brainfuse_run.exe $NEUPED_ROOT/models/$1/brainfuse_* $2
+$NEUPED_ROOT/brainfuse_run.exe $NEUPED_ROOT/models/$1/brainfuse_* $2
