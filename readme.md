@@ -7,7 +7,7 @@ Getting started
 ---------------
 Run NEUPED with:
     
-    neuped model_name input_run_file
+    neuped model_name input.dat
 
 For example:
 
@@ -29,8 +29,8 @@ Possible `model_name` are: `EPED1_D3D`, `EPED1_ITERbaseline`
 
 Inputs format
 -------------
-Notice that the `sample` directory contains samples of the `input_run_file` for each of the models.
-The `input_run_file` has the format of:
+Notice that the `sample` directory contains samples of the `input.dat` for each of the models.
+The `input.dat` has the format of:
 
     N1
     i1 i2 i3 i4 i5 i6 i7 i8 i9
