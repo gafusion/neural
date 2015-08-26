@@ -1,0 +1,60 @@
+#!/usr/bin/env python
+#
+# this script parses EPED1 input files and runs them through NEUPED
+
+import os
+import sys
+import glob
+
+NEUPED_ROOT=str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
+
+net_files=glob.glob("%s/models/%s/brainfuse_*"%(NEUPED_ROOT,sys.argv[1]))
+for line in open(net_files[0],'Ur').readlines():
+    if 'input_names' in line:
+        inputs=eval((line.replace('input_names=','[')+']').replace("' '","','"))
+
+legacy_quantities=['shot', 'timeid', 'ip', 'bt', 'r', 'a', 'kappa', 'tri_ave', 'square', 'neped',
+                   'm', 'z', 'betan', 'zeffped', 'm_imp', 'z_imp', 'teped', 'ptotped', 'wid_sny',
+                   'tewid', 'quality', 'tokamak', 'topic', 'runid']
+
+legacy_2_current={
+    'shot':'shot',
+    'timeid':'timeid',
+    'ip':'ip',
+    'bt':'bt',
+    'r':'r',
+    'a':'a',
+    'kappa':'kappa',
+    'tri_ave':'delta',
+    'square':'zeta',
+    'neped':'neped',
+    'm':'m',
+    'z':'z',
+    'betan':'betan',
+    'zeffped':'zeffped',
+    'm_imp':'mi',
+    'z_imp':'zi',
+    'teped':'teped',
+    'ptotped':'ptotped',
+    'wid_sny':'ptotwid',
+    'tewid':'tewid',
+    'quality':'quality',
+    'tokamak':'tokamak',
+    'topic':'topic',
+    'runid':'runid'}
+
+data=[]
+lines=open(sys.argv[2],'Ur').readlines()
+for line in lines[2:]:
+    tmp={}
+    for k,value in enumerate(line.split()):
+        legacy_item=legacy_quantities[k]
+        item=legacy_2_current[legacy_item]
+        tmp[item]=value
+    data.append([])
+    for item in inputs:
+        data[-1].append(tmp[item])
+    data[-1]=' '.join(data[-1])
+open('input.dat','w').write('%d\n'%len(data)+'\n'.join(data)+'\n')
+
+os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s"%(NEUPED_ROOT,NEUPED_ROOT,sys.argv[1],'input.dat'))

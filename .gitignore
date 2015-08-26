@@ -1,6 +1,9 @@
+.idea
 OMFITsave.txt
 *.exe
 *~
-./output_avg.dat
-./output_std.dat
+./output.avg
+./output.std
+./input.lim
+./input.dat
 \#*\#

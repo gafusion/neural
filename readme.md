@@ -42,9 +42,16 @@ where:
     N1 number of runs
     i.. inputs (N1 lines)
 
+EPED1 input format
+------------------
+The `neuped_eped1` script will automatically make the conversion from
+the EPED1 input file format to the NEUPED file format.
+
+    neuped_epde1 EPED1_D3D eped1_input_file
+
 Outputs format
 --------------
-Upon run the `output_avg.dat` and `output_std.dat` files will be generated in the
+Upon run the `output.dat` and `output.std` files will be generated in the
 current working directory with the NEUPED prediction and its standard deviation.
 Both files have format:
 
@@ -58,7 +65,7 @@ where::
     N1 number of runs
     o.. outputs (N1 lines)
 
-The `input_lim.dat` file contains the values of the inputs normalized to the training range
+The `input.lim` file contains the values of the inputs normalized to the training range
 (assuming a normal distribution of the training data). The values in this file cat be used
 to check that values provided by the user are within the training range of the model. e.g:
 
@@ -68,7 +75,7 @@ to check that values provided by the user are within the training range of the m
 
 A rule of thumb is that the model is applicable where the magnitude of the normalized inputs is <2
 
-The `input_lim.dat` file has format:
+The `input.lim` file has format:
 
     N1
     i1 i2 i3 i4 i5 i6 i7 i8 i9

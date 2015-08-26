@@ -84,9 +84,9 @@ int main(int argc, char *argv[])
   }
 
   // print and write
-  fp1 = fopen("output_avg.dat", "w");
-  fp2 = fopen("output_std.dat", "w");
-  fp3 = fopen("input_lim.dat", "w");
+  fp1 = fopen("output.avg", "w");
+  fp2 = fopen("output.std", "w");
+  fp3 = fopen("input.lim", "w");
   fprintf(fp1,"%u\n",num_data);
   fprintf(fp2,"%u\n",num_data);
   fprintf(fp3,"%u\n",num_data);

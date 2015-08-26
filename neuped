@@ -1,15 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env python
+#
+# this script runs NEUPED
 
-#Find where this NEUPED installation resides
-pushd . > /dev/null
-NEUPED_ROOT="${BASH_SOURCE[0]}";
-if ([ -h "${OMFIT_ROOT}" ]) then
-  while([ -h "${NEUPED_ROOT}" ]) do cd `dirname "$NEUPED_ROOT"`; NEUPED_ROOT=`readlink "${NEUPED_ROOT}"`; done
-fi
-cd `dirname ${NEUPED_ROOT}` > /dev/null
-NEUPED_ROOT=`pwd`;
-popd  > /dev/null
+import os
+import sys
 
-echo "./brainfuse_run.exe $NEUPED_ROOT/models/$1/brainfuse_* $2"
+NEUPED_ROOT=str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
 
-$NEUPED_ROOT/brainfuse_run.exe $NEUPED_ROOT/models/$1/brainfuse_* $2
+os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s"%(NEUPED_ROOT,NEUPED_ROOT,sys.argv[1],sys.argv[2]))
