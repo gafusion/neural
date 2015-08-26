@@ -18,12 +18,25 @@ Pedestal models
 Possible `model_name` are: `EPED1_D3D`, `EPED1_ITERbaseline`
 
 * EPED1_D3D
- * input_names = 'a' 'betan' 'bt' 'delta' 'ip' 'kappa' 'neped' 'r' 'zeffped'
- * output_names = 'OUT_p_E1' 'OUT_ptop_E1' 'OUT_wid_E1' 'OUT_widtop_E1'
+ * assumes:
+  * `zeta  = 0.0`
+  * `m     = 2.0`
+  * `z     = 1`
+ * inputs: `a` `betan` `bt` `delta` `ip` `kappa` `neped` `r` `zeffped`
+ * outputs: `pped` `ptop` `wped` `wtop`
 
 * EPED1_ITERbaseline
- * input_names = 'betan' 'delta' 'kappa' 'neped' 'zeffped'
- * output_names = 'OUT_p_E1' 'OUT_ptop_E1' 'OUT_wid_E1' 'OUT_widtop_E1'
+ * assumes:
+  * `ip    = 15`
+  * `bt    = 5.3`
+  * `r     = 6.2`
+  * `a     = 2`
+  * `zeta  = 0.0`
+  * `betan = 2.0`
+  * `m     = 2.5`
+  * `z     = 1`
+ * inputs: `betan` `delta` `kappa` `neped` `zeffped`
+ * outputs: `pped` `ptop` `wped` `wtop`
 
 Inputs format
 -------------
