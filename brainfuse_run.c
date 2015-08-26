@@ -86,26 +86,26 @@ int main(int argc, char *argv[])
   // print and write
   fp1 = fopen("output_avg.dat", "w");
   fp2 = fopen("output_std.dat", "w");
-  fp3 = fopen("output_lim.dat", "w");
+  fp3 = fopen("input_lim.dat", "w");
   fprintf(fp1,"%u\n",num_data);
   fprintf(fp2,"%u\n",num_data);
   fprintf(fp3,"%u\n",num_data);
-  for(i = 0; i != data_avg->num_data; i++){
+  for(i = 0; i < data_avg->num_data; i++){
       printf("Run %d: ",i);
-      for(j = 0; j != data_avg->num_input; j++){
+      for(j = 0; j < data_avg->num_input; j++){
         fprintf(fp3,"%f ",data_lim->input[i][j]);
       }
       fprintf(fp3,"\n");
-      for(j = 0; j != data_avg->num_output; j++){
-          printf("%f (%f) ",data_avg->output[i][j],data_lim->output[i][j]);
+      for(j = 0; j < data_avg->num_output; j++){
+          printf("%f (%f) ",data_avg->output[i][j],data_std->output[i][j]);
           fprintf(fp1,"%f ",data_avg->output[i][j]);
           fprintf(fp2,"%f ",data_std->output[i][j]);
-          fprintf(fp3,"%f ",data_lim->output[i][j]);
+          //fprintf(fp3,"%f ",data_lim->output[i][j]);
       }
       printf("\n");
       fprintf(fp1,"\n");
       fprintf(fp2,"\n");
-      fprintf(fp3,"\n");
+      //fprintf(fp3,"\n");
   }
 
   fclose(fp1);
