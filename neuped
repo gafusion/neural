@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#Find where this NEUPED installation resides
+pushd . > /dev/null
+NEUPED_ROOT="${BASH_SOURCE[0]}";
+if ([ -h "${OMFIT_ROOT}" ]) then
+  while([ -h "${NEUPED_ROOT}" ]) do cd `dirname "$NEUPED_ROOT"`; NEUPED_ROOT=`readlink "${NEUPED_ROOT}"`; done
+fi
+cd `dirname ${NEUPED_ROOT}` > /dev/null
+NEUPED_ROOT=`pwd`;
+popd  > /dev/null
+
+echo "./brainfuse_run.exe $NEUPED_ROOT/models/$1/brainfuse_* $2"
+
+./brainfuse_run.exe $NEUPED_ROOT/models/$1/brainfuse_* $2
