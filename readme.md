@@ -1,7 +1,7 @@
 NEUPED
 ======
 
-Engine for neural-network based pedestal predictions
+Engine for neural-network powered pedestal predictions
 
 Getting started
 ---------------
@@ -87,8 +87,23 @@ where:
     N1 number of runs
     i.. inputs (N1 lines)
 
+On GA workstations
+------------------
+* Set in your .login file
+
+    setenv FANN_ROOT /u/meneghini/fann
+
 Installation
 ------------
-* Clone and cmake install the FANN library: `git@github.com:libfann/fann.git`
+* Install the FANN library:
 
-* Modify and run ./compile.sh script
+    git clone git@github.com:libfann/fann.git
+    cd fann
+    cmake .
+    make
+
+* Set in your .login file
+
+    setenv FANN_ROOT loation_where_fann_was_cloned
+
+* Run ./compile.sh script in the NEUPED folder

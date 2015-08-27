@@ -6,6 +6,9 @@ import os
 import sys
 import glob
 
+if 'FANN_ROOT' in os.environ:
+    os.environ['LD_LIBRARY_PATH']+=':'+os.environ['FANN_ROOT']+os.sep+'src'
+
 NEUPED_ROOT=str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
 
 net_files=glob.glob("%s/models/%s/brainfuse_*"%(NEUPED_ROOT,sys.argv[1]))
