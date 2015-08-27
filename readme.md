@@ -89,21 +89,21 @@ where:
 
 On GA workstations
 ------------------
-* Set in your .login file
+Set in your .login file
 
     setenv FANN_ROOT /u/meneghini/fann
 
 Installation
 ------------
-* Install the FANN library:
+Install the FANN library:
 
     git clone git@github.com:libfann/fann.git
     cd fann
     cmake .
     make
 
-* Set in your .login file
+Set in your .login file:
 
     setenv FANN_ROOT loation_where_fann_was_cloned
 
-* Run ./compile.sh script in the NEUPED folder
+Run `./compile.sh` script in the NEUPED folder
