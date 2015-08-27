@@ -5,18 +5,21 @@
 import os
 import sys
 import glob
+from pprint import pprint
 
 if 'FANN_ROOT' in os.environ:
-    os.environ['LD_LIBRARY_PATH']+=':'+os.environ['FANN_ROOT']+os.sep+'src'
+    os.environ['LD_LIBRARY_PATH']=os.environ.get('LD_LIBRARY_PATH','')+':'+os.environ['FANN_ROOT']+os.sep+'src'
 
 NEUPED_ROOT=str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
 
 net_files=glob.glob("%s/models/%s/brainfuse_*"%(NEUPED_ROOT,sys.argv[1]))
 for line in open(net_files[0],'Ur').readlines():
     if 'input_names' in line:
-        inputs=eval((line.replace('input_names=','[')+']').replace("' '","','"))
+        inputNames=eval((line.replace('input_names=','[')+']').replace("' '","','"))
+    if 'output_names' in line:
+        outputNames=eval((line.replace('output_names=','[')+']').replace("' '","','"))
 
-legacy_quantities=['shot', 'timeid', 'ip', 'bt', 'r', 'a', 'kappa', 'tri_ave', 'square', 'neped',
+legacy_in_quantities=['shot', 'timeid', 'ip', 'bt', 'r', 'a', 'kappa', 'tri_ave', 'square', 'neped',
                    'm', 'z', 'betan', 'zeffped', 'm_imp', 'z_imp', 'teped', 'ptotped', 'wid_sny',
                    'tewid', 'quality', 'tokamak', 'topic', 'runid']
 
@@ -44,20 +47,65 @@ legacy_2_current={
     'quality':'quality',
     'tokamak':'tokamak',
     'topic':'topic',
-    'runid':'runid'}
+    'runid':'runid',
+
+    'Ptot_ex':'ptotped',
+    'wid_ex':'ptotwid',
+    'tewid_ex':'tewid',
+
+    'p_E1':'OUT_p_E1',
+    'wid_E1':'OUT_wid_E1',
+    'ptop_E1':'OUT_ptop_E1',
+    'widtop_E1':'OUT_widtop_E1',
+}
+
+inlines=open(sys.argv[2],'Ur').readlines()
 
 data=[]
-lines=open(sys.argv[2],'Ur').readlines()
-for line in lines[2:]:
+for inline in inlines[2:]:
     tmp={}
-    for k,value in enumerate(line.split()):
-        legacy_item=legacy_quantities[k]
+    for k1,value in enumerate(inline.split()):
+        legacy_item=legacy_in_quantities[k1]
         item=legacy_2_current[legacy_item]
         tmp[item]=value
     data.append([])
-    for item in inputs:
+    for item in inputNames:
         data[-1].append(tmp[item])
     data[-1]=' '.join(data[-1])
 open('input.dat','w').write('%d\n'%len(data)+'\n'.join(data)+'\n')
 
 os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s"%(NEUPED_ROOT,NEUPED_ROOT,sys.argv[1],'input.dat'))
+
+legacy_out_quantities=['shot','timeid','p_E1','2nT_ex','Ptot_ex','wid_E1','wid_ex','tewid_ex',
+                       'bNped_E1','betaped_E1','betapped_E1','coll','ptop_E1','widtop_E1']
+
+current_out_2_legacy={
+    'OUT_p_E1':('p_E1',1E3,float),
+    'OUT_wid_E1':('wid_E1',1,float),
+    'OUT_ptop_E1':('ptop_E1',1E3,float),
+    'OUT_widtop_E1':('widtop_E1',1,float),
+}
+
+outlines=open('output.avg','Ur').readlines()
+
+n=10
+results_string=[' '.join(map(lambda x:x.ljust(n),legacy_out_quantities))]
+for k,(inline,outline) in enumerate(zip(inlines[2:],outlines[1:])):
+    tmp={}
+    for k1,value in enumerate(inline.split()):
+        legacy_item=legacy_in_quantities[k1]
+        item=legacy_2_current[legacy_item]
+        tmp[item]=value
+    for k1,value in enumerate(outline.split()):
+        item=outputNames[k1]
+        legacy_item,mult,tp=current_out_2_legacy[item]
+        if item in outputNames:
+            tmp[item]=str(tp(eval(value)*mult))
+
+    results_string.append([])
+    for legacy_item in legacy_out_quantities:
+        item=legacy_2_current.get(legacy_item,'')
+        results_string[-1].append(tmp.get(item,'-').ljust(n))
+    results_string[-1]=' '.join(results_string[-1])
+
+open(os.path.splitext(sys.argv[2])[0]+'_out'+os.path.splitext(sys.argv[2])[1],'w').write('\n'.join(results_string))
