@@ -6,7 +6,8 @@
 import os
 import sys
 import glob
-from pprint import pprint
+
+no_std=True
 
 if 'FANN_ROOT' in os.environ:
     os.environ['LD_LIBRARY_PATH']=os.environ.get('LD_LIBRARY_PATH','')+':'+os.environ['FANN_ROOT']+os.sep+'src'
@@ -93,6 +94,8 @@ avglines=open('output.avg','Ur').readlines()
 stdlines=open('output.std','Ur').readlines()
 
 n=15
+if no_std:
+    n=12
 results_string=[''.join(map(lambda x:x.rjust(n),legacy_out_quantities))]
 for k,(inline,avgline,stdline) in enumerate(zip(inlines[2:],avglines[1:],stdlines[1:])):
     tmp={}
@@ -104,7 +107,10 @@ for k,(inline,avgline,stdline) in enumerate(zip(inlines[2:],avglines[1:],stdline
         item=outputNames[k1]
         legacy_item,mult,tp=current_out_2_legacy[item]
         if item in outputNames:
-            tmp[item]=('%3.3f±%3.3f'%(tp(eval(value)*mult),tp(eval(unc)*mult))).rjust(n+1)
+            if no_std:
+                tmp[item]=('%3.3f'%(tp(eval(value)*mult))).rjust(n)
+            else:
+                tmp[item]=('%3.3f±%3.3f'%(tp(eval(value)*mult),tp(eval(unc)*mult))).rjust(n+1)
 
     results_string.append([])
     for legacy_item in legacy_out_quantities:
