@@ -108,9 +108,9 @@ for k,(inline,avgline,stdline) in enumerate(zip(inlines[2:],avglines[1:],stdline
         legacy_item,mult,tp=current_out_2_legacy[item]
         if item in outputNames:
             if no_std:
-                tmp[item]=('%3.3f'%(tp(eval(value)*mult))).rjust(n)
+                tmp[item]=('%3.4f'%(tp(eval(value)*mult))).rjust(n)
             else:
-                tmp[item]=('%3.3f±%3.3f'%(tp(eval(value)*mult),tp(eval(unc)*mult))).rjust(n+1)
+                tmp[item]=('%3.4f±%3.4f'%(tp(eval(value)*mult),tp(eval(unc)*mult))).rjust(n+1)
 
     results_string.append([])
     for legacy_item in legacy_out_quantities:
