@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <math.h>
+#include <string.h>
 
 int main(int argc, char *argv[])
 {
@@ -13,13 +14,15 @@ int main(int argc, char *argv[])
     }
 
   // Read in input parameters
-  unsigned int i,j,n,num_data;
+  unsigned int i,j,k,n,num_data;
   struct fann *ann;
   const char *annFile;
   const char *runFile = argv[argc-1];
-  struct fann_train_data *data_avg, *data_std, *data_lim;
-  fann_type *calc_out;
+  struct fann_train_data *data_avg, *data_std, *data_lim, *data_nrm;
+  fann_type *calc_out, *norm_output, tmp;
   FILE *fp1, *fp2, *fp3;
+  char dummy[100000];
+  char *result = NULL;
 
   // Run
   for (n = 1; n < argc-1; n++){
@@ -41,19 +44,39 @@ int main(int argc, char *argv[])
         data_avg = fann_create_train(num_data, ann->num_input, ann->num_output);
         data_std = fann_create_train(num_data, ann->num_input, ann->num_output);
         data_lim = fann_create_train(num_data, ann->num_input, ann->num_output);
+        data_nrm = fann_create_train(num_data, ann->num_input, ann->num_output);
     	for(i = 0; i < num_data; i++){
 		    for(j = 0; j < ann->num_input; j++){
 			    fscanf(fp1, FANNSCANF " ", &data_avg->input[i][j]);
 			    data_std->input[i][j]=data_avg->input[i][j];
 			    data_lim->input[i][j]=data_avg->input[i][j];
+			    data_nrm->input[i][j]=data_avg->input[i][j];
 			}
             for(j = 0; j < ann->num_output; j++){
 			    data_avg->output[i][j]=0.;
 			    data_std->output[i][j]=0.;
 			    data_lim->output[i][j]=0.;
+			    data_nrm->output[i][j]=1.;
 			}
 		}
 	    fclose(fp1);
+
+        //output normalization
+        fp2 = fopen(annFile,"r");
+        for(i = 0; i < 46; i++){
+          fgets(dummy,100000,fp2);
+        }
+        if (fscanf(fp2,"norm_output=") == 1){
+    	    for(i = 0; i < num_data; i++){
+        	    for(j = 0; j < ann->num_output; j++){
+                    for(k = 0; k < ann->num_input; k++){
+                        fscanf(fp2, FANNSCANF " ", &tmp);
+                        data_nrm->output[i][j]*=pow(data_nrm->input[i][k],tmp);
+                    }
+        	    }
+        	}
+        }
+    	fclose(fp2);
      }
 
      for(i = 0; i != data_avg->num_data; i++){
@@ -72,9 +95,9 @@ int main(int argc, char *argv[])
   for(i = 0; i != data_avg->num_data; i++){
       for(j = 0; j != data_avg->num_output; j++){
           //std
-          data_std->output[i][j]=sqrt( (data_std->output[i][j]- (data_avg->output[i][j]*data_avg->output[i][j])/(argc-2))/(argc-2) );
+          data_std->output[i][j]=sqrt( (data_std->output[i][j]- (data_avg->output[i][j]*data_avg->output[i][j])/(argc-2))/(argc-2) ) * data_nrm->output[i][j];
           //avg
-          data_avg->output[i][j]=data_avg->output[i][j]/(argc-2);
+          data_avg->output[i][j]=data_avg->output[i][j]/(argc-2) * data_nrm->output[i][j];
           //lim
           data_lim->output[i][j]=data_avg->output[i][j];
       }
@@ -97,7 +120,7 @@ int main(int argc, char *argv[])
       }
       fprintf(fp3,"\n");
       for(j = 0; j < data_avg->num_output; j++){
-          printf("%f (%f) ",data_avg->output[i][j],data_std->output[i][j]);
+          printf("%f (%f) ",data_avg->output[i][j],data_std->output[i][j] );
           fprintf(fp1,"%f ",data_avg->output[i][j]);
           fprintf(fp2,"%f ",data_std->output[i][j]);
           //fprintf(fp3,"%f ",data_lim->output[i][j]);
