@@ -66,15 +66,15 @@ int main(int argc, char *argv[])
         for(i = 0; i < 46; i++){
           fgets(dummy,100000,fp2);
         }
-        if (fscanf(fp2,"norm_output=") == 1){
-    	    for(i = 0; i < num_data; i++){
-        	    for(j = 0; j < ann->num_output; j++){
-                    for(k = 0; k < ann->num_input; k++){
-                        fscanf(fp2, FANNSCANF " ", &tmp);
+        if (fscanf(fp2,"norm_output=") == 0){
+            for(j = 0; j < ann->num_output; j++){
+                for(k = 0; k < ann->num_input; k++){
+                    fscanf(fp2, FANNSCANF " ", &tmp);
+    	            for(i = 0; i < num_data; i++){
                         data_nrm->output[i][j]*=pow(data_nrm->input[i][k],tmp);
-                    }
-        	    }
-        	}
+        	        }
+                }
+            }
         }
     	fclose(fp2);
      }
