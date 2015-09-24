@@ -11,25 +11,16 @@ Run NEUPED with:
 
 For example:
 
-    neuped EPED1_D3D samples/EPED1_D3D/input.dat
+    cd samples
+    ../neuped_eped1 EPED1_D3D 2015check.txt
 
 Pedestal models
 ---------------
-Possible `model_name` are: `EPED1_D3D`, `EPED1_ITERbaseline`
+Possible `model_name` are the directory names contained in the models directory
+e.g. EPED1_ALL
 
-* EPED1_D3D
- * assumes: `zeta=0.0` `m=2.0` `z=1`
- * inputs: `a` `betan` `bt` `delta` `ip` `kappa` `neped` `r` `zeffped`
- * outputs: `pped` `ptop` `wped` `wtop`
-
-* EPED1_ITERbaseline
- * assumes: `ip=15.0` `bt=5.3` `r=6.2` `a=2` `zeta=0.0` `betan=2.0` `m=2.5` `z=1`
- * inputs: `betan` `delta` `kappa` `neped` `zeffped`
- * outputs: `pped` `ptop` `wped` `wtop`
-
-Inputs format
+raw inputs format
 -------------
-Notice that the `sample` directory contains samples of the `input.dat` for each of the models.
 The `input.dat` has the format of:
 
     N1
@@ -49,7 +40,7 @@ the EPED1 input file format to the NEUPED file format.
 
     neuped_epde1 EPED1_D3D eped1_input_file
 
-Outputs format
+raw outputs format
 --------------
 Upon run the `output.dat` and `output.std` files will be generated in the
 current working directory with the NEUPED prediction and its standard deviation.

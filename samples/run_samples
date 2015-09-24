@@ -1,7 +1,0 @@
-pushd EPED1_D3D
-../../neuped EPED1_D3D input.dat
-popd
-
-pushd EPED1_ITERbaseline
-../../neuped EPED1_ITERbaseline input.dat
-popd
