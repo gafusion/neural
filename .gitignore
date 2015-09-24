@@ -2,8 +2,9 @@
 OMFITsave.txt
 *.exe
 *~
-./output.avg
-./output.std
-./input.lim
-./input.dat
+output.avg
+output.std
+input.lim
+input.dat
+2015check_out.txt
 \#*\#
