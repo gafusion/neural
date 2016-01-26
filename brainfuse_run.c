@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
   const char *runFile = argv[argc-1];
   struct fann_train_data *data_avg, *data_std, *data_lim, *data_nrm;
   fann_type *calc_out, *norm_output, tmp;
-  FILE *fp1, *fp2, *fp3;
+  FILE *fp1, *fp2, *fp3, *fp4;
   char dummy[100000];
   char *result = NULL;
 
@@ -66,15 +66,15 @@ int main(int argc, char *argv[])
         for(i = 0; i < 46; i++){
           fgets(dummy,100000,fp2);
         }
-        if (fscanf(fp2,"norm_output=") == 0){
-            for(j = 0; j < ann->num_output; j++){
-                for(k = 0; k < ann->num_input; k++){
-                    fscanf(fp2, FANNSCANF " ", &tmp);
-    	            for(i = 0; i < num_data; i++){
+        if (fscanf(fp2,"norm_output=") == 1){
+    	    for(i = 0; i < num_data; i++){
+        	    for(j = 0; j < ann->num_output; j++){
+                    for(k = 0; k < ann->num_input; k++){
+                        fscanf(fp2, FANNSCANF " ", &tmp);
                         data_nrm->output[i][j]*=pow(data_nrm->input[i][k],tmp);
-        	        }
-                }
-            }
+                    }
+        	    }
+        	}
         }
     	fclose(fp2);
      }
@@ -109,29 +109,32 @@ int main(int argc, char *argv[])
   // print and write
   fp1 = fopen("output.avg", "w");
   fp2 = fopen("output.std", "w");
-  fp3 = fopen("input.lim", "w");
+  fp3 = fopen("input.lim" , "w");
+  fp4 = fopen("output.lim", "w");
   fprintf(fp1,"%u\n",num_data);
   fprintf(fp2,"%u\n",num_data);
   fprintf(fp3,"%u\n",num_data);
+  fprintf(fp4,"%u\n",num_data);
   for(i = 0; i < data_avg->num_data; i++){
       printf("Run %d: ",i);
       for(j = 0; j < data_avg->num_input; j++){
         fprintf(fp3,"%f ",data_lim->input[i][j]);
       }
-      fprintf(fp3,"\n");
       for(j = 0; j < data_avg->num_output; j++){
           printf("%f (%f) ",data_avg->output[i][j],data_std->output[i][j] );
           fprintf(fp1,"%f ",data_avg->output[i][j]);
           fprintf(fp2,"%f ",data_std->output[i][j]);
-          //fprintf(fp3,"%f ",data_lim->output[i][j]);
+          fprintf(fp4,"%f ",data_lim->output[i][j]);
       }
       printf("\n");
+      fprintf(fp3,"\n");
       fprintf(fp1,"\n");
       fprintf(fp2,"\n");
-      //fprintf(fp3,"\n");
+      fprintf(fp4,"\n");
   }
-
   fclose(fp1);
   fclose(fp2);
+  fclose(fp3);
+  fclose(fp4);
   return 0;
 }
