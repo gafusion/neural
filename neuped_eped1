@@ -14,7 +14,11 @@ if 'FANN_ROOT' in os.environ:
 
 NEUPED_ROOT=str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
 
-net_files=glob.glob("%s/models/%s/brainfuse_*"%(NEUPED_ROOT,sys.argv[1]))
+NEUPED_MODEL=sys.argv[1]
+
+INPUT_FILENAME=sys.argv[2]
+
+net_files=glob.glob("%s/models/%s/brainfuse_*"%(NEUPED_ROOT,NEUPED_MODEL))
 for line in open(net_files[0],'Ur').readlines():
     if 'input_names' in line:
         inputNames=eval((line.replace('input_names=','[')+']').replace("' '","','"))
@@ -62,7 +66,7 @@ legacy_2_current={
     'betaped_E1':'OUT_betaped_E1'
 }
 
-inlines=open(sys.argv[2],'Ur').readlines()
+inlines=open(INPUT_FILENAME,'Ur').readlines()
 
 data=[]
 for inline in inlines[2:]:
@@ -77,7 +81,9 @@ for inline in inlines[2:]:
     data[-1]=' '.join(data[-1])
 open('input.dat','w').write('%d\n'%len(data)+'\n'.join(data)+'\n')
 
-os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s"%(NEUPED_ROOT,NEUPED_ROOT,sys.argv[1],'input.dat'))
+sys.argv[0]=NEUPED_ROOT+os.sep+'neuped'
+sys.argv[2]='input.dat'
+execfile(sys.argv[0])
 
 legacy_out_quantities=['shot','timeid','p_E1','2nT_ex','Ptot_ex','wid_E1','wid_ex','tewid_ex',
                        'bNped_E1','betaped_E1','betapped_E1','coll','ptop_E1','widtop_E1']
@@ -118,4 +124,4 @@ for k,(inline,avgline,stdline) in enumerate(zip(inlines[2:],avglines[1:],stdline
         results_string[-1].append(tmp.get(item,'-').rjust(n))
     results_string[-1]=''.join(results_string[-1])
 
-open(os.path.splitext(sys.argv[2])[0]+'_out'+os.path.splitext(sys.argv[2])[1],'w').write('\n'.join(results_string))
+open(os.path.splitext(INPUT_FILENAME)[0]+'_out'+os.path.splitext(INPUT_FILENAME)[1],'w').write('\n'.join(results_string))
