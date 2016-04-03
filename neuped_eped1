@@ -22,8 +22,8 @@ for line in open(net_files[0],'Ur').readlines():
         outputNames=eval((line.replace('output_names=','[')+']').replace("' '","','"))
 
 legacy_in_quantities=['shot', 'timeid', 'ip', 'bt', 'r', 'a', 'kappa', 'tri_ave', 'square', 'neped',
-                   'm', 'z', 'betan', 'zeffped', 'm_imp', 'z_imp', 'teped', 'ptotped', 'wid_sny',
-                   'tewid', 'quality', 'tokamak', 'topic', 'runid']
+                      'm', 'z', 'betan', 'zeffped', 'm_imp', 'z_imp', 'teped', 'ptotped', 'wid_sny',
+                      'tewid', 'quality', 'tokamak', 'topic', 'runid']
 
 legacy_2_current={
     'shot':'shot',

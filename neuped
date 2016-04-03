@@ -4,10 +4,159 @@
 
 import os
 import sys
+import glob
+from numpy import *
+from io import StringIO
+
+set_printoptions(threshold=nan)
 
 if 'FANN_ROOT' in os.environ:
-    os.environ['LD_LIBRARY_PATH']=os.environ.get('LD_LIBRARY_PATH','')+':'+os.environ['FANN_ROOT']+os.sep+'src'
+    os.environ['LD_LIBRARY_PATH'] = os.environ.get('LD_LIBRARY_PATH', '') + ':' + os.environ[
+        'FANN_ROOT'] + os.sep + 'src'
 
-NEUPED_ROOT=str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
+NEUPED_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
 
-os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s"%(NEUPED_ROOT,NEUPED_ROOT,sys.argv[1],sys.argv[2]))
+net_files = glob.glob("%s/models/%s/brainfuse_*" % (NEUPED_ROOT, sys.argv[1]))
+for line in open(net_files[0], 'Ur').readlines():
+    if 'input_names' in line:
+        inputNames = eval((line.replace('input_names=', '[') + ']').replace("' '", "','"))
+    if 'output_names' in line:
+        outputNames = eval((line.replace('output_names=', '[') + ']').replace("' '", "','"))
+
+os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s" % (NEUPED_ROOT, NEUPED_ROOT, sys.argv[1], sys.argv[2]))
+
+inplines = '\n'.join(open('input.dat', 'Ur').readlines()[1:])
+avglines = '\n'.join(open('output.avg', 'Ur').readlines()[1:])
+stdlines = '\n'.join(open('output.std', 'Ur').readlines()[1:])
+
+tmp = loadtxt(StringIO(unicode(inplines)))
+inputs = {}
+for k, name in enumerate(inputNames):
+    inputs[name] = tmp[:, k]
+    print('%s : %4.4f +- %4.4f' % (name.ljust(12), mean(inputs[name]), std(inputs[name])))
+
+tmp0 = loadtxt(StringIO(unicode(avglines)))
+tmp1 = loadtxt(StringIO(unicode(stdlines)))
+avgout = {}
+stdout = {}
+for k, name in enumerate(outputNames):
+    name = name.lstrip('OUT_')
+    avgout[name] = tmp0[:, k]
+    stdout[name] = tmp1[:, k]
+    print('%s : %4.4f +- %4.4f' % (('<%s>' % name).ljust(12), mean(avgout[name]), std(avgout[name])))
+    print('%s : %4.4f +- %4.4f' % (('~%s~' % name).ljust(12), mean(stdout[name]), std(stdout[name])))
+
+def toq_profiles(psin, widthp, nped13, tpedEV, ncore13=0, tcoreEV=0, nedge13=0, tedgeEV=0, nexpin=1.1, nexpout=1.1, texpin=1.2, texpout=1.4):
+    # This is a direct fortran->python translation from the TOQ source
+
+    e_19 = 1.602176565
+
+    # pressure at pedestal
+    pped = 2. * (nped13 * 1.e13) * (tpedEV * 1.6022e-12)
+
+    # psi_N at tanh symmetry point
+    xphalf = 1. - widthp
+
+    # pconst=?
+    pconst = 1. - tanh((1. - xphalf) / widthp)
+
+    # normalization so that n_ped=nped13
+    a_n = 2. * (nped13 - nedge13) / (1. + tanh(1.) - pconst)
+
+    # normalization so that T_ped=tedgeEV
+    a_t = 2. * (tpedEV - tedgeEV) / (1. + tanh(1.) - pconst)
+
+    # psi_N at pedestal
+    xped = xphalf - widthp
+
+    # core density
+    ncoretanh = 0.5 * a_n * (1. - tanh(-xphalf / widthp) - pconst) + nedge13
+
+    # core temperature
+    tcoretanh = 0.5 * a_t * (1. - tanh(-xphalf / widthp) - pconst) + tedgeEV
+
+    ne = zeros(psin.shape)
+    Te = zeros(psin.shape)
+
+    # for all flux surfaces
+    for i in range(len(psin)):
+        # psi at flux surface
+        xpsi = psin[i]
+
+        # density at flux surface
+        ne[i] = _ne = 0.5 * a_n * (1. - tanh((xpsi - xphalf) / widthp) - pconst) + nedge13
+
+        # temperature at flux surface
+        Te[i] = _Te = 0.5 * a_t * (1. - tanh((xpsi - xphalf) / widthp) - pconst) + tedgeEV
+
+        # xtoped is proportional to psi, but normed to equal 1 at top of ped
+        xtoped = xpsi / xped
+
+        # if ncore13 is set, then add polynomial piece to get desired core value (add only inside pedestal)
+        if (ncore13 > 0. and xpsi < xped):
+            # density at flux surface
+            ne[i] = _ne = _ne + (ncore13 - ncoretanh) * (1. - xtoped ** nexpin) ** nexpout
+
+        # if tcoreEV is set, then add polynomial piece to get desired core value (add only inside pedestal)
+        if (tcoreEV > 0. and xpsi < xped):
+            # temperature at flux surface
+            Te[i] = _Te = _Te + (tcoreEV - tcoretanh) * (1. - xtoped ** texpin) ** texpout
+
+    return locals()
+
+def estimate_toq_tcoreEV(inputs):
+    # toq equilibrium
+    rzero = inputs['r'] * 100
+    rmax = inputs['a'] * 100
+    eshape = inputs['kappa']
+    xshape = inputs['delta']
+    tdum = linspace(0, 2 * pi, 1001)
+    xbndry = rzero + rmax * (cos(tdum) - xshape * sin(tdum) ** 2)
+    zbndry = eshape * rmax * sin(tdum)
+    # lp is the circumference in [cm]
+    lp = sum(sqrt(diff(xbndry) ** 2 + diff(zbndry) ** 2))
+
+    # estimated core temperature
+    totcur = inputs['ip'] * 1E6
+    baxis0 = inputs['bt'] * 1E4
+    betapwant = inputs['betan']
+    tcoreEV = 2.5e3 * baxis0 / 1E4 * totcur / 1E6 * betapwant / (1.5 * nped13 * rmax / 100.)
+    return tcoreEV
+
+e_19 = 1.602176565
+
+print_opts = {'separator': ' ',
+              'suppress_small': True,
+              'precision':6,
+              'max_line_width': 1E6}
+
+with open('neuped.profiles', 'w') as f:
+    f.write('%d # psin, ne, ptot\n' % len(avgout['wid_E1']))
+
+    for k in range(len(avgout['wid_E1'])):
+        widthp = avgout['wid_E1'][k] / 2.
+        nped13 = inputs['neped'][k]
+        tpedEV = avgout['p_E1'][k] / nped13 / e_19 / 2 * 1E6
+        ncore13 = nped13 * 1.5
+        nedge13 = nped13 * 0.25
+        tedgeEV = 75
+
+        tcoreEV = estimate_toq_tcoreEV({n: inputs[n][k] for n in inputs})
+
+        tmp = toq_profiles(
+            psin=linspace(0, 1, 1001),
+            widthp=widthp,
+            nped13=nped13,
+            tpedEV=tpedEV,
+            ncore13=ncore13,
+            tcoreEV=tcoreEV,
+            nedge13=nedge13,
+            tedgeEV=tedgeEV,
+            nexpin=1.1,
+            nexpout=1.1,
+            texpin=1.2,
+            texpout=1.4)
+
+        f.write(array2string(tmp['psin'], **print_opts)[1:-2] + '\n')
+        f.write(array2string(tmp['ne'] * 1E19, **print_opts)[1:-2] + '\n')
+        f.write(array2string(tmp['Te'] * tmp['ne'] * 2 * e_19, **print_opts)[1:-2] + '\n')
