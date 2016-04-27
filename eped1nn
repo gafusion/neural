@@ -130,7 +130,7 @@ print_opts = {'separator': ' ',
               'precision':6,
               'max_line_width': 1E6}
 
-with open('eped1nn.profiles', 'w') as f:
+with open('epednn.profiles', 'w') as f:
     f.write('%d # psin, ne, ptot\n' % len(avgout['wid_E1']))
 
     for k in range(len(avgout['wid_E1'])):
