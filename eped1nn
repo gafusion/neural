@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# this script runs NEUPED
+# this script runs EPED1NN
 
 import os
 import sys
@@ -14,16 +14,16 @@ if 'FANN_ROOT' in os.environ:
     os.environ['LD_LIBRARY_PATH'] = os.environ.get('LD_LIBRARY_PATH', '') + ':' + os.environ[
         'FANN_ROOT'] + os.sep + 'src'
 
-NEUPED_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
+EPED1NN_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
 
-net_files = glob.glob("%s/models/%s/brainfuse_*" % (NEUPED_ROOT, sys.argv[1]))
+net_files = glob.glob("%s/models/%s/brainfuse_*" % (EPED1NN_ROOT, sys.argv[1]))
 for line in open(net_files[0], 'Ur').readlines():
     if 'input_names' in line:
         inputNames = eval((line.replace('input_names=', '[') + ']').replace("' '", "','"))
     if 'output_names' in line:
         outputNames = eval((line.replace('output_names=', '[') + ']').replace("' '", "','"))
 
-os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s" % (NEUPED_ROOT, NEUPED_ROOT, sys.argv[1], sys.argv[2]))
+os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s" % (EPED1NN_ROOT, EPED1NN_ROOT, sys.argv[1], sys.argv[2]))
 
 inplines = '\n'.join(open('input.dat', 'Ur').readlines()[1:])
 avglines = '\n'.join(open('output.avg', 'Ur').readlines()[1:])
@@ -130,7 +130,7 @@ print_opts = {'separator': ' ',
               'precision':6,
               'max_line_width': 1E6}
 
-with open('neuped.profiles', 'w') as f:
+with open('eped1nn.profiles', 'w') as f:
     f.write('%d # psin, ne, ptot\n' % len(avgout['wid_E1']))
 
     for k in range(len(avgout['wid_E1'])):

@@ -1,18 +1,18 @@
-NEUPED
+EPED1NN
 ======
 
 Engine for neural-network powered pedestal predictions
 
 Getting started
 ---------------
-Run NEUPED with:
+Run EPED1NN with:
     
-    neuped model_name input.dat
+    eped1nn model_name input.dat
 
 For example:
 
     cd samples
-    ../neuped_eped1 EPED1_D3D 2015check.txt
+    ../eped1nn_eped1 EPED1_D3D 2015check.txt
 
 Pedestal models
 ---------------
@@ -35,15 +35,15 @@ where:
 
 EPED1 input format
 ------------------
-The `neuped_eped1` script will automatically make the conversion from
-the EPED1 input file format to the NEUPED file format.
+The `eped1nn_eped1` script will automatically make the conversion from
+the EPED1 input file format to the EPED1NN file format.
 
-    neuped_epde1 EPED1_D3D eped1_input_file
+    eped1nn_epde1 EPED1_D3D eped1_input_file
 
 raw outputs format
 --------------
 Upon run the `output.dat` and `output.std` files will be generated in the
-current working directory with the NEUPED prediction and its standard deviation.
+current working directory with the EPED1NN prediction and its standard deviation.
 Both files have format:
 
     N1
@@ -97,4 +97,4 @@ Set in your .login file:
 
     setenv FANN_ROOT loation_where_fann_was_cloned
 
-Run `./compile.sh` script in the NEUPED folder
+Run `./compile.sh` script in the EPED1NN folder

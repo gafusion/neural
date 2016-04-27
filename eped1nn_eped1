@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# this script parses EPED1 input files and runs them through NEUPED
+# this script parses EPED1 input files and runs them through EPED1NN
 
 import os
 import sys
@@ -12,13 +12,13 @@ no_std=True
 if 'FANN_ROOT' in os.environ:
     os.environ['LD_LIBRARY_PATH']=os.environ.get('LD_LIBRARY_PATH','')+':'+os.environ['FANN_ROOT']+os.sep+'src'
 
-NEUPED_ROOT=str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
+EPED1NN_ROOT=str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
 
-NEUPED_MODEL=sys.argv[1]
+EPED1NN_MODEL=sys.argv[1]
 
 INPUT_FILENAME=sys.argv[2]
 
-net_files=glob.glob("%s/models/%s/brainfuse_*"%(NEUPED_ROOT,NEUPED_MODEL))
+net_files=glob.glob("%s/models/%s/brainfuse_*"%(EPED1NN_ROOT,EPED1NN_MODEL))
 for line in open(net_files[0],'Ur').readlines():
     if 'input_names' in line:
         inputNames=eval((line.replace('input_names=','[')+']').replace("' '","','"))
@@ -81,7 +81,7 @@ for inline in inlines[2:]:
     data[-1]=' '.join(data[-1])
 open('input.dat','w').write('%d\n'%len(data)+'\n'.join(data)+'\n')
 
-sys.argv[0]=NEUPED_ROOT+os.sep+'neuped'
+sys.argv[0]=EPED1NN_ROOT+os.sep+'eped1nn'
 sys.argv[2]='input.dat'
 execfile(sys.argv[0])
 
