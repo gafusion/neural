@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+#
+# this script runs TGLFNN
+
+import os
+import sys
+import glob
+from numpy import *
+from io import StringIO
+
+set_printoptions(threshold=nan)
+
+if 'FANN_ROOT' in os.environ:
+    os.environ['LD_LIBRARY_PATH'] = os.environ.get('LD_LIBRARY_PATH', '') + ':' + os.environ['FANN_ROOT'] + os.sep + 'src'
+
+TGLFNN_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
+
+if 'BRAINFUSE_ROOT' in os.environ:
+    BRAINFUSE_ROOT=os.environ['BRAINFUSE_ROOT']
+else:
+    BRAINFUSE_ROOT = os.path.abspath(TGLFNN_ROOT+os.sep+'..')
+
+net_files = glob.glob("%s/models/%s/brainfuse_*" % (TGLFNN_ROOT, sys.argv[1]))
+for line in open(net_files[0], 'Ur').readlines():
+    if 'input_names' in line:
+        inputNames = eval((line.replace('input_names=', '[') + ']').replace("' '", "','"))
+    if 'output_names' in line:
+        outputNames = eval((line.replace('output_names=', '[') + ']').replace("' '", "','"))
+
+os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s" % (BRAINFUSE_ROOT, TGLFNN_ROOT, sys.argv[1], sys.argv[2]))

@@ -8,13 +8,23 @@ import glob
 from numpy import *
 from io import StringIO
 
+import os
+import sys
+import glob
+from numpy import *
+from io import StringIO
+
 set_printoptions(threshold=nan)
 
 if 'FANN_ROOT' in os.environ:
-    os.environ['LD_LIBRARY_PATH'] = os.environ.get('LD_LIBRARY_PATH', '') + ':' + os.environ[
-        'FANN_ROOT'] + os.sep + 'src'
+    os.environ['LD_LIBRARY_PATH'] = os.environ.get('LD_LIBRARY_PATH', '') + ':' + os.environ['FANN_ROOT'] + os.sep + 'src'
 
-EPED1NN_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
+TGLFNN_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
+
+if 'EPED1NN_ROOT' in os.environ:
+    EPED1NN_ROOT=os.environ['EPED1NN_ROOT']
+else:
+    EPED1NN_ROOT = os.path.abspath(EPED1NN_ROOT+os.sep+'..')
 
 net_files = glob.glob("%s/models/%s/brainfuse_*" % (EPED1NN_ROOT, sys.argv[1]))
 for line in open(net_files[0], 'Ur').readlines():
@@ -23,7 +33,7 @@ for line in open(net_files[0], 'Ur').readlines():
     if 'output_names' in line:
         outputNames = eval((line.replace('output_names=', '[') + ']').replace("' '", "','"))
 
-os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s" % (EPED1NN_ROOT, EPED1NN_ROOT, sys.argv[1], sys.argv[2]))
+os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s" % (BRAINFUSE_ROOT, EPED1NN_ROOT, sys.argv[1], sys.argv[2]))
 
 inplines = '\n'.join(open('input.dat', 'Ur').readlines()[1:])
 avglines = '\n'.join(open('output.avg', 'Ur').readlines()[1:])
