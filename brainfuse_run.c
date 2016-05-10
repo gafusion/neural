@@ -4,6 +4,8 @@
 #include <math.h>
 #include <string.h>
 
+//NOTE: this assumes that the training database is the same for all NN
+
 int main(int argc, char *argv[])
 {
   // Check input consistency
@@ -15,6 +17,7 @@ int main(int argc, char *argv[])
 
   // Read in input parameters
   unsigned int i,j,k,n,num_data;
+  struct fann **anns;
   struct fann *ann;
   const char *annFile;
   const char *runFile = argv[argc-1];
@@ -23,21 +26,25 @@ int main(int argc, char *argv[])
   FILE *fp1, *fp2, *fp3, *fp4;
   char dummy[100000];
   char *result = NULL;
+  char * pch;
   int verbose = 0;
 
+  // array of pointers to store all of the anns
+  anns = malloc((argc-2) * sizeof(struct fann*));
+
   // Run
-  for (n = 1; n < argc-1; n++){
+  for (n = 0; n < argc-2; n++){
       // Load the network from the file
-      annFile = argv[n];
+      annFile = argv[n+1];
       if (verbose)  printf("Reading network file %s\n", annFile);
-      ann = fann_create_from_file(annFile);
+      anns[n] = ann = fann_create_from_file(annFile);
       if (ann == NULL){
         if (verbose)  printf("Invalid network file %s\n", annFile);
         return -1;
       }
 
-    if (n==1){
-        // Read input data
+    if (n==0){
+        // Read input data and initialize arrays
         if (verbose)  printf("Reading data from file %s: ", runFile);
         fp1 = fopen(runFile, "r");
         fscanf(fp1, "%u\n", &num_data);
@@ -64,30 +71,36 @@ int main(int argc, char *argv[])
 
         //output normalization
         fp2 = fopen(annFile,"r");
-        for(i = 0; i < 46; i++){
+        for(i = 0; i < 47; i++){
           fgets(dummy,100000,fp2);
         }
-        if (fscanf(fp2,"norm_output=") == 1){
-    	    for(i = 0; i < num_data; i++){
-        	    for(j = 0; j < ann->num_output; j++){
-                    for(k = 0; k < ann->num_input; k++){
-                        fscanf(fp2, FANNSCANF " ", &tmp);
-                        data_nrm->output[i][j]*=pow(data_nrm->input[i][k],tmp);
-                    }
-        	    }
-        	}
+        if (strstr(dummy, "norm_output=") != NULL){
+            pch = strtok(dummy+12," \n");
+            for(j = 0; j < ann->num_output; j++){
+                for(k = 0; k < ann->num_input; k++){
+                   tmp=atof(pch);
+                   pch = strtok (NULL, " \n");
+                   if (tmp!=0){
+                       for(i = 0; i < num_data; i++){
+                           data_nrm->output[i][j]*=pow(data_nrm->input[i][k],tmp);
+                       }
+                   }
+                }
+            }
         }
-    	fclose(fp2);
+        fclose(fp2);
+
      }
 
+     //run
      for(i = 0; i != data_avg->num_data; i++){
         fann_scale_input( ann, data_avg->input[i] );
         calc_out = fann_run( ann, data_avg->input[i] );
         fann_descale_input( ann, data_avg->input[i] );
         fann_descale_output( ann, calc_out);
         for(j = 0; j != data_avg->num_output; j++){
-           data_avg->output[i][j]+=calc_out[j];
-           data_std->output[i][j]+=calc_out[j]*calc_out[j];
+           data_avg->output[i][j] += calc_out[j]*data_nrm->output[i][j];
+           data_std->output[i][j] += calc_out[j]*data_nrm->output[i][j] * calc_out[j]*data_nrm->output[i][j];
         }
      }
   }
@@ -96,11 +109,11 @@ int main(int argc, char *argv[])
   for(i = 0; i != data_avg->num_data; i++){
       for(j = 0; j != data_avg->num_output; j++){
           //std
-          data_std->output[i][j]=sqrt( (data_std->output[i][j]- (data_avg->output[i][j]*data_avg->output[i][j])/(argc-2))/(argc-2) ) * data_nrm->output[i][j];
+          data_std->output[i][j]=sqrt( (data_std->output[i][j]- (data_avg->output[i][j]*data_avg->output[i][j])/(argc-2))/(argc-2) );
           //avg
-          data_avg->output[i][j]=data_avg->output[i][j]/(argc-2) * data_nrm->output[i][j];
+          data_avg->output[i][j]=data_avg->output[i][j]/(argc-2);
           //rng (NOTE: takes last ANN and not respective ANN, but it's good approx)
-	      data_lim->output[i][j]=data_std->output[i][j]/ann->scale_deviation_out[j];
+          data_lim->output[i][j]=data_std->output[i][j]/ann->scale_deviation_out[j];
       }
       //lim (NOTE: takes last ANN and not respective ANN, but it's good approx)
       fann_scale_input( ann, data_lim->input[i] );
