@@ -15,8 +15,13 @@ if 'FANN_ROOT' in os.environ:
 
 TGLFNN_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
 
+if 'TGLFNN_ROOT' in os.environ:
+    TGLFNN_ROOT = os.environ['TGLFNN_ROOT']
+else:
+    TGLFNN_ROOT = os.path.abspath(TGLFNN_ROOT)
+
 if 'BRAINFUSE_ROOT' in os.environ:
-    BRAINFUSE_ROOT=os.environ['BRAINFUSE_ROOT']
+    BRAINFUSE_ROOT = os.environ['BRAINFUSE_ROOT']
 else:
     BRAINFUSE_ROOT = os.path.abspath(TGLFNN_ROOT+os.sep+'..')
 

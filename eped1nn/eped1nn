@@ -8,23 +8,24 @@ import glob
 from numpy import *
 from io import StringIO
 
-import os
-import sys
-import glob
-from numpy import *
-from io import StringIO
+verbose=True
 
 set_printoptions(threshold=nan)
 
 if 'FANN_ROOT' in os.environ:
     os.environ['LD_LIBRARY_PATH'] = os.environ.get('LD_LIBRARY_PATH', '') + ':' + os.environ['FANN_ROOT'] + os.sep + 'src'
 
-TGLFNN_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
+EPED1NN_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
 
 if 'EPED1NN_ROOT' in os.environ:
-    EPED1NN_ROOT=os.environ['EPED1NN_ROOT']
+    EPED1NN_ROOT = os.environ['EPED1NN_ROOT']
 else:
-    EPED1NN_ROOT = os.path.abspath(EPED1NN_ROOT+os.sep+'..')
+    EPED1NN_ROOT = os.path.abspath(EPED1NN_ROOT)
+
+if 'BRAINFUSE_ROOT' in os.environ:
+    BRAINFUSE_ROOT = os.environ['BRAINFUSE_ROOT']
+else:
+    BRAINFUSE_ROOT = os.path.abspath(EPED1NN_ROOT+os.sep+'..')
 
 net_files = glob.glob("%s/models/%s/brainfuse_*" % (EPED1NN_ROOT, sys.argv[1]))
 for line in open(net_files[0], 'Ur').readlines():
@@ -43,7 +44,7 @@ tmp = atleast_2d(loadtxt(StringIO(unicode(inplines))))
 inputs = {}
 for k, name in enumerate(inputNames):
     inputs[name] = tmp[:, k]
-    print('%s : %4.4f +- %4.4f' % (name.ljust(12), mean(inputs[name]), std(inputs[name])))
+    if verbose: print('%s : %4.4f +- %4.4f' % (name.ljust(12), mean(inputs[name]), std(inputs[name])))
 
 tmp0 = atleast_2d(loadtxt(StringIO(unicode(avglines))))
 tmp1 = atleast_2d(loadtxt(StringIO(unicode(stdlines))))
@@ -51,10 +52,12 @@ avgout = {}
 stdout = {}
 for k, name in enumerate(outputNames):
     name = name.lstrip('OUT_')
+    translate={'p_E1_0':'p_E1','wid_E1_0':'wid_E1'}
+    name=translate.get(name,name)
     avgout[name] = tmp0[:, k]
     stdout[name] = tmp1[:, k]
-    print('%s : %4.4f +- %4.4f' % (('<%s>' % name).ljust(12), mean(avgout[name]), std(avgout[name])))
-    print('%s : %4.4f +- %4.4f' % (('~%s~' % name).ljust(12), mean(stdout[name]), std(stdout[name])))
+    if verbose: print('%s : %4.4f +- %4.4f' % (('<%s>' % name).ljust(12), mean(avgout[name]), std(avgout[name])))
+    if verbose: print('%s : %4.4f +- %4.4f' % (('~%s~' % name).ljust(12), mean(stdout[name]), std(stdout[name])))
 
 def toq_profiles(psin, widthp, nped13, tpedEV, ncore13=0, tcoreEV=0, nedge13=0, tedgeEV=0, nexpin=1.1, nexpout=1.1, texpin=1.2, texpout=1.4):
     # This is a direct fortran->python translation from the TOQ source

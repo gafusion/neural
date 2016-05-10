@@ -111,7 +111,7 @@ for k,(inline,avgline,stdline) in enumerate(zip(inlines[2:],avglines[1:],stdline
         tmp[item]=value.rjust(n)
     for k1,(value,unc) in enumerate(zip(avgline.split(),stdline.split())):
         item=outputNames[k1]
-        legacy_item,mult,tp=current_out_2_legacy[item]
+        legacy_item,mult,tp=current_out_2_legacy.get(item,(item,1,float))
         if item in outputNames:
             if no_std:
                 tmp[item]=('%3.4f'%(tp(eval(value)*mult))).rjust(n)
