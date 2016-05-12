@@ -7,6 +7,8 @@ import sys
 import glob
 from numpy import *
 from io import StringIO
+sys.path.insert(0,'/home/meneghini/OMFIT-source/src/classes')
+import brainfuse
 
 set_printoptions(threshold=nan)
 
@@ -32,4 +34,23 @@ for line in open(net_files[0], 'Ur').readlines():
     if 'output_names' in line:
         outputNames = eval((line.replace('output_names=', '[') + ']').replace("' '", "','"))
 
-os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s" % (BRAINFUSE_ROOT, TGLFNN_ROOT, sys.argv[1], sys.argv[2]))
+#os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s" % (BRAINFUSE_ROOT, TGLFNN_ROOT, sys.argv[1], sys.argv[2]))
+
+nets={}
+for k in  glob.glob('%s/models/%s/brainfuse_*'%(TGLFNN_ROOT, sys.argv[1])):
+    nets[k]=net=brainfuse.brainfuse(k)
+
+dB={}
+for k in net.inputNames:
+    dB[k]=[]
+for line in open(sys.argv[2],'Ur').readlines()[1:]:
+    line=line.strip()
+    if not len(line):
+        continue
+    for k,item in enumerate(line.split()):
+        print item
+        dB[net.inputNames[k]].append( float(item))
+    for k in net.inputNames:
+        dB[k]=array(dB[k])
+
+out,sut,targets,nets,out_0=brainfuse.activateMergeNets(nets,dB,'RMIN_LOC')
