@@ -7,8 +7,6 @@ import sys
 import glob
 from numpy import *
 from io import StringIO
-sys.path.insert(0,'/home/meneghini/OMFIT-source/src/classes')
-import brainfuse
 
 set_printoptions(threshold=nan)
 
@@ -16,6 +14,9 @@ if 'FANN_ROOT' in os.environ:
     os.environ['LD_LIBRARY_PATH'] = os.environ.get('LD_LIBRARY_PATH', '') + ':' + os.environ['FANN_ROOT'] + os.sep + 'src'
 
 TGLFNN_ROOT = str(os.path.abspath(os.path.dirname(unicode(__file__, sys.getfilesystemencoding()))))
+
+sys.path.insert(0,TGLFNN_ROOT+os.sep+'..')
+import brainfuse
 
 if 'TGLFNN_ROOT' in os.environ:
     TGLFNN_ROOT = os.environ['TGLFNN_ROOT']
@@ -48,9 +49,24 @@ for line in open(sys.argv[2],'Ur').readlines()[1:]:
     if not len(line):
         continue
     for k,item in enumerate(line.split()):
-        print item
         dB[net.inputNames[k]].append( float(item))
     for k in net.inputNames:
         dB[k]=array(dB[k])
 
 out,sut,targets,nets,out_0=brainfuse.activateMergeNets(nets,dB,'RMIN_LOC')
+
+with open('output.avg','w') as f:
+    f.write('%d\n'%out.shape[0])
+    for k in range(out.shape[0]):
+        f.write(' '.join(map(lambda x:'%6.6f'%x,out[k,:]))+'\n')
+
+with open('output.std','w') as f:
+    f.write('%d\n'%sut.shape[0])
+    for k in range(sut.shape[0]):
+        f.write(' '.join(map(lambda x:'%6.6f'%x,sut[k,:]))+'\n')
+
+with open('output.rng','w') as f:
+    f.write('%d\n'%sut.shape[0])
+    for k in range(sut.shape[0]):
+        f.write(' '.join(map(lambda x:'%6.6f'%x,out[k,:]*0+1))+'\n')
+
