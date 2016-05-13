@@ -48,10 +48,13 @@ for line in open(sys.argv[2],'Ur').readlines()[1:]:
     line=line.strip()
     if not len(line):
         continue
-    for k,item in enumerate(line.split()):
+    line=line.split()
+    if len(line)!=len(net.inputNames):
+        raise(Exception('Wrong number of entries in %s!'%sys.argv[2]))
+    for k,item in enumerate(line):
         dB[net.inputNames[k]].append( float(item))
-    for k in net.inputNames:
-        dB[k]=array(dB[k])
+for k in net.inputNames:
+    dB[k]=array(dB[k])
 
 out,sut,targets,nets,out_0=brainfuse.activateMergeNets(nets,dB,'RMIN_LOC')
 
