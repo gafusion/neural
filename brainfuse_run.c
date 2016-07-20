@@ -17,10 +17,11 @@ int main(int argc, char *argv[])
   unsigned int j,n,num_data;
   fann_type *data_in;
   const char *runFile = argv[argc-1];
+  const char *annFiles = argv[argc-1];
   FILE *fp1, *fp2;
 
   // Initialize arrays
-  load_anns(argc-2,argv+1);
+  load_anns(argv[1],"brainfuse");
 
   // Read input data
   printf("Reading data from file %s: ", runFile);

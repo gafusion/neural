@@ -1,5 +1,5 @@
 #include <fann.h>
-int load_anns(int nnets, char *argv[]);
+int load_anns(char *string, char *basename);
 int load_anns_inputs(fann_type *data_in);
 int run_anns();
 fann_type * get_anns_avg();
