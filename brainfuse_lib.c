@@ -56,6 +56,13 @@ int load_anns(int n, char *argv[]){
   return 0;
 }
 
+int load_anns_(int n, char *argv[]){
+  return load_anns(n,argv);
+}
+
+int load_anns__(int n, char *argv[]){
+  return load_anns(n,argv);
+}
 
 //=================
 // LOAD ANNS INPUTS
@@ -68,6 +75,14 @@ int load_anns_inputs(fann_type *data_in){
     data_std->input[0][j]=data_avg->input[0][j];
   }
   return 0;
+}
+
+int load_anns_inputs_(fann_type *data_in){
+  return load_anns_inputs(data_in);
+}
+
+int load_anns_inputs__(fann_type *data_in){
+  return load_anns_inputs(data_in);
 }
 
 //=============
@@ -94,7 +109,7 @@ int run_anns(){
   // calculate avg and std
   for(j = 0; j != data_avg->num_output; j++){
       //std
-      data_std->output[0][j]=sqrt( (data_std->output[0][j]- (data_avg->output[0][j]*data_avg->output[0][j])/nnans)/nnans );
+      data_std->output[0][j]=sqrt( (data_std->output[0][j] - (data_avg->output[0][j]*data_avg->output[0][j])/nnans)/nnans );
       //avg
       data_avg->output[0][j]=data_avg->output[0][j]/nnans;
   }
@@ -102,58 +117,67 @@ int run_anns(){
   return 0;
 }
 
-//============
-// MAIN
-//============
-int main(int argc, char *argv[])
-{
-  // Check input consistency
-  if (argc < 3)
-    {
-      printf("Usage: %s ANN_file[s] run_file\n", argv[0]);
-      return -1;
-    }
+int run_anns_(){
+  return run_anns();
+}
 
-  // Read in input parameters
-  unsigned int j,n,num_data;
-  fann_type *data_in;
-  const char *runFile = argv[argc-1];
-  FILE *fp1, *fp2;
+int run_anns__(){
+  return run_anns();
+}
 
-  // Initialize arrays
-  load_anns(argc-2,argv+1);
+//=============
+// GET ANNS PROPERTIES and RESULTS
+//=============
+int get_anns_num_output(){
+  return anns[0]->num_output;
+}
 
-  // Read input data
-  if (verbose)  printf("Reading data from file %s: ", runFile);
-  fp1 = fopen(runFile, "r");
-  fscanf(fp1, "%u\n", &num_data);
-  if (verbose)  printf("%u runs %d inputs %d ouputs\n", num_data, anns[0]->num_input, anns[0]->num_output);
-  data_in = malloc(anns[0]->num_input * sizeof(fann_type));
-  for(j = 0; j < anns[0]->num_input; j++){
-    fscanf(fp1, FANNSCANF " ", &data_in[j]);
-  }
-  fclose(fp1);
+int get_anns_num_output_(){
+  return get_anns_num_output();
+}
 
-  // Load inputs
-  load_anns_inputs(data_in);
+int get_anns_num_output__(){
+  return get_anns_num_output();
+}
 
-  // Run anns
-  run_anns();
+//--
 
-  // print and write
-  fp1 = fopen("output.avg", "w");
-  fp2 = fopen("output.std", "w");
-  fprintf(fp1,"%u\n",num_data);
-  fprintf(fp2,"%u\n",num_data);
-  for(j = 0; j < data_avg->num_output; j++){
-      if (verbose)  printf("%f (%f) ",data_avg->output[0][j],data_std->output[0][j] );
-      fprintf(fp1,"%f ",data_avg->output[0][j]);
-      fprintf(fp2,"%f ",data_std->output[0][j]);
-  }
-  if (verbose)  printf("\n");
-  fprintf(fp1,"\n");
-  fprintf(fp2,"\n");
-  fclose(fp1);
-  fclose(fp2);
-  return 0;
+int get_anns_num_input(){
+  return anns[0]->num_input;
+}
+
+int get_anns_num_input_(){
+  return get_anns_num_input();
+}
+
+int get_anns_num_input__(){
+  return get_anns_num_input();
+}
+
+//--
+
+fann_type * get_anns_avg(){
+  return data_avg->output[0];
+}
+
+fann_type * get_anns_avg_(){
+  return get_anns_avg();
+}
+
+fann_type * get_anns_avg__(){
+  return get_anns_avg();
+}
+
+//--
+
+fann_type * get_anns_std(){
+  return data_std->output[0];
+}
+
+fann_type * get_anns_std_(){
+  return get_anns_std();
+}
+
+fann_type * get_anns_std__(){
+  return get_anns_std();
 }
