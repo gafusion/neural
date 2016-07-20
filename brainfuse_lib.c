@@ -10,14 +10,13 @@ unsigned int nnans;
 unsigned int loaded_anns=0;
 // array of pointers to store all of the anns
 struct fann **anns=0;
-struct fann_train_data *data_avg=0, *data_std=0;
+struct fann_train_data *data_avg, *data_std;
 
 //=============
 // LOADING ANNS
 //=============
 int load_anns(int n, char *argv[]){
   unsigned int j;
-  struct fann *ann;
   const char *annFile;
 
   nnans=n;
@@ -57,6 +56,20 @@ int load_anns(int n, char *argv[]){
   return 0;
 }
 
+
+//=================
+// LOAD ANNS INPUTS
+//=================
+int load_anns_inputs(fann_type *data_in){
+  unsigned int j;
+  if (verbose)  printf("Reading ANNs input data %d inputs %d ouputs\n", anns[0]->num_input, anns[0]->num_output);
+  for(j = 0; j < anns[0]->num_input; j++){
+    data_avg->input[0][j]=(fann_type)data_in[j];
+    data_std->input[0][j]=data_avg->input[0][j];
+  }
+  return 0;
+}
+
 //=============
 // RUNNING ANNS
 //=============
@@ -64,10 +77,7 @@ int run_anns(){
   unsigned int n, j;
   fann_type *calc_out;
 
-  //copy avg input data to std input data
-  for(j = 0; j < anns[0]->num_input; j++){
-    data_std->input[0][j]=data_avg->input[0][j];
-  }
+  if (verbose)  printf("Running ANNs\n");
 
   //run
   for (n = 0; n < nnans; n++){
@@ -105,13 +115,12 @@ int main(int argc, char *argv[])
     }
 
   // Read in input parameters
-  unsigned int j,k,n,num_data;
-
-  struct fann *ann;
+  unsigned int j,n,num_data;
+  fann_type *data_in;
   const char *runFile = argv[argc-1];
   FILE *fp1, *fp2;
 
-  //initialize arrays
+  // Initialize arrays
   load_anns(argc-2,argv+1);
 
   // Read input data
@@ -119,12 +128,16 @@ int main(int argc, char *argv[])
   fp1 = fopen(runFile, "r");
   fscanf(fp1, "%u\n", &num_data);
   if (verbose)  printf("%u runs %d inputs %d ouputs\n", num_data, anns[0]->num_input, anns[0]->num_output);
+  data_in = malloc(anns[0]->num_input * sizeof(fann_type));
   for(j = 0; j < anns[0]->num_input; j++){
-    fscanf(fp1, FANNSCANF " ", &data_avg->input[0][j]);
+    fscanf(fp1, FANNSCANF " ", &data_in[j]);
   }
   fclose(fp1);
 
-  //run anns
+  // Load inputs
+  load_anns_inputs(data_in);
+
+  // Run anns
   run_anns();
 
   // print and write
