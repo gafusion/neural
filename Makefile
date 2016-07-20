@@ -31,11 +31,11 @@ EXEC = brainfuse_run.exe
 
 OBJECTS = brainfuse_lib.o brainfuse_exe.o
 
-$(EXEC) : brainfuse_run.c $(LLIB) 
-	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lfann -lm
-
 $(LLIB): brainfuse_lib.o Makefile
 	$(ARCH) $(LLIB) $<
+
+$(EXEC) : brainfuse_run.c $(LLIB) 
+	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lfann -lm
 
 all: $(LLIB) $(EXEC)
 
