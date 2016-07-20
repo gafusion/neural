@@ -67,44 +67,19 @@ int main(int argc, char *argv[])
         data_avg = fann_create_train(num_data, ann->num_input, ann->num_output);
         data_std = fann_create_train(num_data, ann->num_input, ann->num_output);
         data_lim = fann_create_train(num_data, ann->num_input, ann->num_output);
-        data_nrm = fann_create_train(num_data, ann->num_input, ann->num_output);
     	for(i = 0; i < num_data; i++){
             for(j = 0; j < ann->num_input; j++){
                 fscanf(fp1, FANNSCANF " ", &data_avg->input[i][j]);
 			    data_std->input[i][j]=data_avg->input[i][j];
 			    data_lim->input[i][j]=data_avg->input[i][j];
-			    data_nrm->input[i][j]=data_avg->input[i][j];
 		}
             for(j = 0; j < ann->num_output; j++){
 			    data_avg->output[i][j]=0.;
 			    data_std->output[i][j]=0.;
 			    data_lim->output[i][j]=0.;
-			    data_nrm->output[i][j]=1.;
 			}
 		}
 	    fclose(fp1);
-
-        //output normalization
-        fp2 = fopen(annFile,"r");
-        for(i = 0; i < 47; i++){
-          fgets(dummy,100000,fp2);
-        }
-        if (strstr(dummy, "norm_output=") != NULL){
-            pch = strtok(dummy+12," \n");
-            for(j = 0; j < ann->num_output; j++){
-                for(k = 0; k < ann->num_input; k++){
-                   tmp=atof(pch);
-                   pch = strtok (NULL, " \n");
-                   if (tmp!=0){
-                       for(i = 0; i < num_data; i++){
-                           data_nrm->output[i][j]*=pow(data_nrm->input[i][k],tmp);
-                       }
-                   }
-                }
-            }
-        }
-        fclose(fp2);
-
      }
 
      //run
@@ -114,8 +89,8 @@ int main(int argc, char *argv[])
         fann_descale_input( ann, data_avg->input[i] );
         fann_descale_output( ann, calc_out);
         for(j = 0; j != data_avg->num_output; j++){
-           data_avg->output[i][j] += calc_out[j]*data_nrm->output[i][j];
-           data_std->output[i][j] += calc_out[j]*data_nrm->output[i][j] * calc_out[j]*data_nrm->output[i][j];
+           data_avg->output[i][j] += calc_out[j];
+           data_std->output[i][j] += calc_out[j] * calc_out[j];
         }
      }
   }
