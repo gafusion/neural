@@ -7,7 +7,7 @@
 #include <dirent.h>
 //NOTE: this assumes that the training database is the same for all NN
 
-unsigned int verbose=1;
+unsigned int verbose=0;
 unsigned int nanns;
 unsigned int loaded_anns=0;
 // array of pointers to store all of the anns
@@ -33,7 +33,7 @@ int load_anns(char *directory, char *basename){
     while ((ent = readdir (dir)) != NULL) {
       if (strncmp(ent->d_name,basename,9)==0){
         nanns+=1;
-        printf ("%d,%s\n", nanns, ent->d_name);
+        if(verbose) printf ("%d,%s\n", nanns, ent->d_name);
       }
     }
     closedir (dir);
@@ -184,28 +184,28 @@ int get_anns_num_input__(){
 
 //--
 
-fann_type * get_anns_avg(){
-  return data_avg->output[0];
+double get_anns_avg(int j){
+  return (double)data_avg->output[0][j];
 }
 
-fann_type * get_anns_avg_(){
-  return get_anns_avg();
+double get_anns_avg_(int *j){
+  return (double)get_anns_avg(*j);
 }
 
-fann_type * get_anns_avg__(){
-  return get_anns_avg();
+double get_anns_avg__(int *j){
+  return (double)get_anns_avg(*j);
 }
 
 //--
 
-fann_type * get_anns_std(){
-  return data_std->output[0];
+double get_anns_std(int j){
+  return (double)data_std->output[0][j];
 }
 
-fann_type * get_anns_std_(){
-  return get_anns_std();
+double get_anns_std_(int *j){
+  return (double)get_anns_std(j);
 }
 
-fann_type * get_anns_std__(){
-  return get_anns_std();
+double get_anns_std__(int *j){
+  return (double)get_anns_std(j);
 }

@@ -46,9 +46,9 @@ int main(int argc, char *argv[])
   fprintf(fp1,"%u\n",num_data);
   fprintf(fp2,"%u\n",num_data);
   for(j = 0; j < get_anns_num_output(); j++){
-      printf("%f (%f) ",get_anns_avg()[j],get_anns_std()[j] );
-      fprintf(fp1,"%f ",get_anns_avg()[j]);
-      fprintf(fp2,"%f ",get_anns_std()[j]);
+      printf("%f (%f) ",get_anns_avg(j), get_anns_std(j) );
+      fprintf(fp1,"%f ",get_anns_avg(j));
+      fprintf(fp2,"%f ",get_anns_std(j));
   }
   printf("\n");
   fprintf(fp1,"\n");
