@@ -8,7 +8,7 @@
 //NOTE: this assumes that the training database is the same for all NN
 
 unsigned int verbose=1;
-unsigned int nnans;
+unsigned int nanns;
 unsigned int loaded_anns=0;
 // array of pointers to store all of the anns
 struct fann **anns=0;
@@ -26,24 +26,24 @@ int load_anns(char *directory, char *basename){
 
   if(loaded_anns==0){
     if ((dir = opendir(directory)) == NULL) {
-      perror ("could not open directory");
+      printf("could not open directory: %s",directory);
       return -1;
     }
 
     while ((ent = readdir (dir)) != NULL) {
       if (strncmp(ent->d_name,basename,9)==0){
-        nnans+=1;
-        printf ("%s\n", ent->d_name);
+        nanns+=1;
+        printf ("%d,%s\n", nanns, ent->d_name);
       }
     }
     closedir (dir);
-    if (nnans==0){
+    if (nanns==0){
       return 0;
     }
 
     // Allocate memory for anns
-    if (verbose) printf("Allocate memory for %d anns\n", nnans);
-    anns = malloc(nnans * sizeof(struct fann*));
+    if (verbose) printf("Allocate memory for %d anns\n", nanns);
+    anns = malloc(nanns * sizeof(struct fann*));
 
     // Load the network from the file
     n=0;
@@ -123,7 +123,7 @@ int run_anns(){
   if (verbose)  printf("Running ANNs\n");
 
   //run
-  for (n = 0; n < nnans; n++){
+  for (n = 0; n < nanns; n++){
      fann_scale_input( anns[n], data_avg->input[0] );
      calc_out = fann_run( anns[n], data_avg->input[0] );
      fann_descale_input( anns[n], data_avg->input[0] );
@@ -137,9 +137,9 @@ int run_anns(){
   // calculate avg and std
   for(j = 0; j != data_avg->num_output; j++){
       //std
-      data_std->output[0][j]=sqrt( (data_std->output[0][j] - (data_avg->output[0][j]*data_avg->output[0][j])/nnans)/nnans );
+      data_std->output[0][j]=sqrt( (data_std->output[0][j] - (data_avg->output[0][j]*data_avg->output[0][j])/nanns)/nanns );
       //avg
-      data_avg->output[0][j]=data_avg->output[0][j]/nnans;
+      data_avg->output[0][j]=data_avg->output[0][j]/nanns;
   }
 
   return 0;
