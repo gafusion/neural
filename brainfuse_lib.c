@@ -203,9 +203,9 @@ double get_anns_std(int j){
 }
 
 double get_anns_std_(int *j){
-  return (double)get_anns_std(j);
+  return (double)get_anns_std(*j);
 }
 
 double get_anns_std__(int *j){
-  return (double)get_anns_std(j);
+  return (double)get_anns_std(*j);
 }
