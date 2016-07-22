@@ -23,8 +23,6 @@ else
 	ARCH=ar cr
 endif
 
-#-L $FANN_ROOT/src -I $FANN_ROOT/src/include/ -lfloatfann -lm
-
 LLIB = libbrainfuse.a
 
 EXEC = brainfuse_run.exe
@@ -35,7 +33,7 @@ $(LLIB): brainfuse_lib.o Makefile
 	$(ARCH) $(LLIB) $<
 
 $(EXEC) : brainfuse_run.c $(LLIB) 
-	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lfann -lm
+	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lfann -lm -L$(FANN_ROOT)/src -I$(FANN_ROOT)/src/include/
 
 all: $(LLIB) $(EXEC)
 

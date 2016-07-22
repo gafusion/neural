@@ -24,7 +24,9 @@ int load_anns(char *directory, char *basename){
   struct dirent *ent;
   char annFile[2000];
 
-  if(loaded_anns==0){
+  if(loaded_anns!=0){
+    if(verbose) printf("NN files already loaded\n");
+  }else{
     if ((dir = opendir(directory)) == NULL) {
       printf("could not open directory: %s",directory);
       return -1;
@@ -33,7 +35,7 @@ int load_anns(char *directory, char *basename){
     while ((ent = readdir (dir)) != NULL) {
       if (strncmp(ent->d_name,basename,9)==0){
         nanns+=1;
-        if(verbose) printf ("%d,%s\n", nanns, ent->d_name);
+        if(verbose) printf("%d,%s\n", nanns, ent->d_name);
       }
     }
     closedir (dir);
@@ -97,11 +99,11 @@ int load_anns_inputs(fann_type *data_in){
   unsigned int j;
   if (verbose)  printf("Reading ANNs input data %d inputs %d ouputs\n", anns[0]->num_input, anns[0]->num_output);
   for(j = 0; j < anns[0]->num_input; j++){
-    printf("%f ",data_in[j]);
+    if (verbose) printf("%f ",data_in[j]);
     data_avg->input[0][j]=(fann_type)data_in[j];
     data_std->input[0][j]=data_avg->input[0][j];
   }
-  printf("\n");
+  if (verbose) printf("\n");
   return 0;
 }
 
@@ -120,7 +122,7 @@ int run_anns(){
   unsigned int n, j;
   fann_type *calc_out;
 
-  if (verbose)  printf("Running ANNs\n");
+  if (verbose) printf("Running ANNs\n");
 
   //run
   for (n = 0; n < nanns; n++){
@@ -184,28 +186,44 @@ int get_anns_num_input__(){
 
 //--
 
-double get_anns_avg(int j){
-  return (double)data_avg->output[0][j];
+fann_type get_anns_avg(int j){
+  return data_avg->output[0][j];
 }
 
-double get_anns_avg_(int *j){
-  return (double)get_anns_avg(*j);
+int get_anns_avg_array(fann_type* d){
+  int j;
+  for(j = 0; j != data_avg->num_output; j++){
+    d[j]=data_avg->output[0][j];
+  }
+  return 0;
 }
 
-double get_anns_avg__(int *j){
-  return (double)get_anns_avg(*j);
+int get_anns_avg_array_(fann_type* d){
+  return get_anns_avg_array(d);
+}
+
+int get_anns_avg_array__(fann_type* d){
+  return get_anns_avg_array(d);
 }
 
 //--
 
-double get_anns_std(int j){
-  return (double)data_std->output[0][j];
+fann_type get_anns_std(int j){
+  return data_std->output[0][j];
 }
 
-double get_anns_std_(int *j){
-  return (double)get_anns_std(*j);
+int get_anns_std_array(fann_type* d){
+  int j;
+  for(j = 0; j != data_std->num_output; j++){
+    d[j]=data_std->output[0][j];
+  }
+  return 0;
 }
 
-double get_anns_std__(int *j){
-  return (double)get_anns_std(*j);
+int get_anns_std_array_(fann_type* d){
+  return get_anns_std_array(d);
+}
+
+int get_anns_std_array__(fann_type* d){
+  return get_anns_std_array(d);
 }
