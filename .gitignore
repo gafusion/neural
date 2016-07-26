@@ -13,3 +13,5 @@ epednn.profiles
 *.pyc
 *.o
 *.a
+*.mod
+toq_profiles_test

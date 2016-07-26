@@ -37,6 +37,9 @@ $(EXEC) : brainfuse_run.c $(LLIB)
 
 all: $(LLIB) $(EXEC)
 
+toq_profiles_test:
+	cd eped1nn; $(FC) -o toq_profiles_test toq_profiles.f90 toq_profiles_test.f90
+
 clean:
 	rm -f *.o  *.a *~ $(EXEC)
 
