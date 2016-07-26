@@ -22,6 +22,8 @@ int main(int argc, char *argv[])
 
   // Initialize arrays
   load_anns(0,argv[1],"brainfuse");
+  load_anns(1,argv[1],"brainfuse");
+  load_anns(1,argv[1],"brainfuse");
 
   // Read input data
   printf("Reading data from file %s: ", runFile);

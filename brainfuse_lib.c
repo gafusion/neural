@@ -37,9 +37,13 @@ int load_anns(int global_nn_model, char *directory, char *basename){
     data_std = malloc(n_models * sizeof(struct fann_train_data *));
   }
 
+  if(verbose) printf("NN model %d\n",model);
+
   if(loaded_anns[model]!=0){
     if(verbose) printf("NN files already loaded\n");
+
   }else{
+
     if ((dir = opendir(directory)) == NULL) {
       printf("could not open directory: %s",directory);
       return -1;
