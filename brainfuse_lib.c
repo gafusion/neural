@@ -5,26 +5,39 @@
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
-//NOTE: this assumes that the training database is the same for all NN
 
-unsigned int verbose=0;
-unsigned int nanns;
-unsigned int loaded_anns=0;
-// array of pointers to store all of the anns
-struct fann **anns=0;
-struct fann_train_data *data_avg, *data_std;
+static unsigned int n_models=2;
+static unsigned int verbose=0;
+
+// arrays of pointers storing multiple ANNS instances,
+// of multiple ANNS ensembles, for different physics models
+unsigned int *nanns=NULL;
+unsigned int *loaded_anns=NULL;
+struct fann ***anns;
+struct fann_train_data **data_avg, **data_std;
+int model;
 
 //=============
 // LOADING ANNS
 //=============
 
-int load_anns(char *directory, char *basename){
+int load_anns(int global_nn_model, char *directory, char *basename){
   DIR *dir;
   int n,j;
   struct dirent *ent;
   char annFile[2000];
 
-  if(loaded_anns!=0){
+  model=global_nn_model;
+
+  if (nanns == NULL){
+    nanns = calloc(n_models * sizeof(unsigned int),0);
+    loaded_anns = calloc(n_models * sizeof(unsigned int),0);
+    anns = malloc(n_models * sizeof(struct fann**));
+    data_avg = malloc(n_models * sizeof(struct fann_train_data *));
+    data_std = malloc(n_models * sizeof(struct fann_train_data *));
+  }
+
+  if(loaded_anns[model]!=0){
     if(verbose) printf("NN files already loaded\n");
   }else{
     if ((dir = opendir(directory)) == NULL) {
@@ -34,18 +47,18 @@ int load_anns(char *directory, char *basename){
 
     while ((ent = readdir (dir)) != NULL) {
       if (strncmp(ent->d_name,basename,9)==0){
-        nanns+=1;
-        if(verbose) printf("%d,%s\n", nanns, ent->d_name);
+        nanns[model]+=1;
+        if(verbose) printf("%d,%s\n", nanns[model], ent->d_name);
       }
     }
     closedir (dir);
-    if (nanns==0){
+    if (nanns[model]==0){
       return 0;
     }
 
     // Allocate memory for anns
-    if (verbose) printf("Allocate memory for %d anns\n", nanns);
-    anns = malloc(nanns * sizeof(struct fann*));
+    if (verbose) printf("Allocate memory for %d anns\n", nanns[model]);
+    anns[model] = malloc(nanns[model] * sizeof(struct fann*));
 
     // Load the network from the file
     n=0;
@@ -53,8 +66,8 @@ int load_anns(char *directory, char *basename){
     while ((ent = readdir (dir)) != NULL) {
       if (strncmp(ent->d_name,basename,9)==0){
         sprintf(annFile, "%s/%s", directory,ent->d_name);
-        anns[n] = fann_create_from_file(annFile);
-        if (anns[n] == NULL){
+        anns[model][n] = fann_create_from_file(annFile);
+        if (anns[model][n] == NULL){
           printf("Invalid network file %s\n", annFile);
           return -1;
         }
@@ -65,31 +78,31 @@ int load_anns(char *directory, char *basename){
     closedir (dir);
 
     // Allocate memory for data
-    data_avg = fann_create_train(1, anns[0]->num_input, anns[0]->num_output);
-    data_std = fann_create_train(1, anns[0]->num_input, anns[0]->num_output);
+    data_avg[model] = fann_create_train(1, anns[model][0]->num_input, anns[model][0]->num_output);
+    data_std[model] = fann_create_train(1, anns[model][0]->num_input, anns[model][0]->num_output);
 
-    loaded_anns=1;
+    loaded_anns[model]=1;
   }
 
   //initialize memory
-  for(j = 0; j < anns[0]->num_input; j++){
-    data_avg->input[0][j]=0.;
-    data_std->input[0][j]=0.;
+  for(j = 0; j < anns[model][0]->num_input; j++){
+    data_avg[model]->input[0][j]=0.;
+    data_std[model]->input[0][j]=0.;
   }
-  for(j = 0; j < anns[0]->num_output; j++){
-    data_avg->output[0][j]=0.;
-    data_std->output[0][j]=0.;
+  for(j = 0; j < anns[model][0]->num_output; j++){
+    data_avg[model]->output[0][j]=0.;
+    data_std[model]->output[0][j]=0.;
   }
 
   return n;
 }
 
-int load_anns_(char *directory, char *basename){
-  return load_anns(directory, basename);
+int load_anns_(int *global_nn_model, char *directory, char *basename){
+  return load_anns(*global_nn_model, directory, basename);
 }
 
-int load_anns__(char *directory, char *basename){
-  return load_anns(directory, basename);
+int load_anns__(int *global_nn_model, char *directory, char *basename){
+  return load_anns(*global_nn_model, directory, basename);
 }
 
 //=================
@@ -97,11 +110,11 @@ int load_anns__(char *directory, char *basename){
 //=================
 int load_anns_inputs(fann_type *data_in){
   unsigned int j;
-  if (verbose)  printf("Reading ANNs input data %d inputs %d ouputs\n", anns[0]->num_input, anns[0]->num_output);
-  for(j = 0; j < anns[0]->num_input; j++){
+  if (verbose)  printf("Reading ANNs input data %d inputs %d ouputs\n", anns[model][0]->num_input, anns[model][0]->num_output);
+  for(j = 0; j < anns[model][0]->num_input; j++){
     if (verbose) printf("%f ",data_in[j]);
-    data_avg->input[0][j]=(fann_type)data_in[j];
-    data_std->input[0][j]=data_avg->input[0][j];
+    data_avg[model]->input[0][j]=(fann_type)data_in[j];
+    data_std[model]->input[0][j]=data_avg[model]->input[0][j];
   }
   if (verbose) printf("\n");
   return 0;
@@ -125,23 +138,23 @@ int run_anns(){
   if (verbose) printf("Running ANNs\n");
 
   //run
-  for (n = 0; n < nanns; n++){
-     fann_scale_input( anns[n], data_avg->input[0] );
-     calc_out = fann_run( anns[n], data_avg->input[0] );
-     fann_descale_input( anns[n], data_avg->input[0] );
-     fann_descale_output( anns[n], calc_out);
-     for(j = 0; j != data_avg->num_output; j++){
-       data_avg->output[0][j] += calc_out[j];
-       data_std->output[0][j] += calc_out[j] * calc_out[j];
+  for (n = 0; n < nanns[model]; n++){
+     fann_scale_input( anns[model][n], data_avg[model]->input[0] );
+     calc_out = fann_run( anns[model][n], data_avg[model]->input[0] );
+     fann_descale_input( anns[model][n], data_avg[model]->input[0] );
+     fann_descale_output( anns[model][n], calc_out);
+     for(j = 0; j != data_avg[model]->num_output; j++){
+       data_avg[model]->output[0][j] += calc_out[j];
+       data_std[model]->output[0][j] += calc_out[j] * calc_out[j];
      }
   }
 
   // calculate avg and std
-  for(j = 0; j != data_avg->num_output; j++){
+  for(j = 0; j != data_avg[model]->num_output; j++){
       //std
-      data_std->output[0][j]=sqrt( (data_std->output[0][j] - (data_avg->output[0][j]*data_avg->output[0][j])/nanns)/nanns );
+      data_std[model]->output[0][j]=sqrt( (data_std[model]->output[0][j] - (data_avg[model]->output[0][j]*data_avg[model]->output[0][j])/nanns[model])/nanns[model] );
       //avg
-      data_avg->output[0][j]=data_avg->output[0][j]/nanns;
+      data_avg[model]->output[0][j]=data_avg[model]->output[0][j]/nanns[model];
   }
 
   return 0;
@@ -159,7 +172,7 @@ int run_anns__(){
 // GET ANNS PROPERTIES and RESULTS
 //=============
 int get_anns_num_output(){
-  return anns[0]->num_output;
+  return anns[model][0]->num_output;
 }
 
 int get_anns_num_output_(){
@@ -173,7 +186,7 @@ int get_anns_num_output__(){
 //--
 
 int get_anns_num_input(){
-  return anns[0]->num_input;
+  return anns[model][0]->num_input;
 }
 
 int get_anns_num_input_(){
@@ -187,13 +200,13 @@ int get_anns_num_input__(){
 //--
 
 fann_type get_anns_avg(int j){
-  return data_avg->output[0][j];
+  return data_avg[model]->output[0][j];
 }
 
 int get_anns_avg_array(fann_type* d){
   int j;
-  for(j = 0; j != data_avg->num_output; j++){
-    d[j]=data_avg->output[0][j];
+  for(j = 0; j != data_avg[model]->num_output; j++){
+    d[j]=data_avg[model]->output[0][j];
   }
   return 0;
 }
@@ -209,13 +222,13 @@ int get_anns_avg_array__(fann_type* d){
 //--
 
 fann_type get_anns_std(int j){
-  return data_std->output[0][j];
+  return data_std[model]->output[0][j];
 }
 
 int get_anns_std_array(fann_type* d){
   int j;
-  for(j = 0; j != data_std->num_output; j++){
-    d[j]=data_std->output[0][j];
+  for(j = 0; j != data_std[model]->num_output; j++){
+    d[j]=data_std[model]->output[0][j];
   }
   return 0;
 }
