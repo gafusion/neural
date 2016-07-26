@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 
-static unsigned int n_models=2;
+static unsigned int n_models=2; //number of nn physics models
 static unsigned int verbose=0;
 
 // arrays of pointers storing multiple ANNS instances,
@@ -30,8 +30,8 @@ int load_anns(int global_nn_model, char *directory, char *basename){
   model=global_nn_model;
 
   if (nanns == NULL){
-    nanns = calloc(n_models * sizeof(unsigned int),0);
-    loaded_anns = calloc(n_models * sizeof(unsigned int),0);
+    nanns = calloc(n_models, sizeof(unsigned int));
+    loaded_anns = calloc(n_models, sizeof(unsigned int));
     anns = malloc(n_models * sizeof(struct fann**));
     data_avg = malloc(n_models * sizeof(struct fann_train_data *));
     data_std = malloc(n_models * sizeof(struct fann_train_data *));
@@ -48,7 +48,6 @@ int load_anns(int global_nn_model, char *directory, char *basename){
     while ((ent = readdir (dir)) != NULL) {
       if (strncmp(ent->d_name,basename,9)==0){
         nanns[model]+=1;
-        if(verbose) printf("%d,%s\n", nanns[model], ent->d_name);
       }
     }
     closedir (dir);
@@ -112,7 +111,7 @@ int load_anns_inputs(fann_type *data_in){
   unsigned int j;
   if (verbose)  printf("Reading ANNs input data %d inputs %d ouputs\n", anns[model][0]->num_input, anns[model][0]->num_output);
   for(j = 0; j < anns[model][0]->num_input; j++){
-    if (verbose) printf("%f ",data_in[j]);
+    if (verbose) printf("in  %02d: %3.3f\n",j+1,data_in[j]);
     data_avg[model]->input[0][j]=(fann_type)data_in[j];
     data_std[model]->input[0][j]=data_avg[model]->input[0][j];
   }
@@ -206,6 +205,7 @@ fann_type get_anns_avg(int j){
 int get_anns_avg_array(fann_type* d){
   int j;
   for(j = 0; j != data_avg[model]->num_output; j++){
+    if (verbose) printf("avg %02d: %3.3f\n",j+1,data_avg[model]->output[0][j]);
     d[j]=data_avg[model]->output[0][j];
   }
   return 0;
@@ -228,6 +228,7 @@ fann_type get_anns_std(int j){
 int get_anns_std_array(fann_type* d){
   int j;
   for(j = 0; j != data_std[model]->num_output; j++){
+    if (verbose) printf("std %02d: %3.3f\n",j+1,data_std[model]->output[0][j]);
     d[j]=data_std[model]->output[0][j];
   }
   return 0;
