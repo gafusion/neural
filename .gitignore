@@ -15,3 +15,4 @@ epednn.profiles
 *.a
 *.mod
 toq_profiles_test
+*.dSYM

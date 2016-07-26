@@ -35,9 +35,9 @@ $(LLIB): brainfuse_lib.o Makefile
 $(EXEC) : brainfuse_run.c $(LLIB) 
 	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lfann -lm -L$(FANN_ROOT)/lib/ -I$(FANN_ROOT)/include/
 
-all: $(LLIB) $(EXEC)
+all: $(LLIB) $(EXEC) toq_profiles_test
 
-toq_profiles_test:
+toq_profiles_test: eped1nn/toq_profiles.f90 eped1nn/toq_profiles_test.f90
 	cd eped1nn; $(FC) -o toq_profiles_test toq_profiles.f90 toq_profiles_test.f90
 
 clean:
