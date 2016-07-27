@@ -29,7 +29,7 @@ EXEC = brainfuse_run.exe
 
 OBJECTS = brainfuse_lib.o brainfuse_exe.o
 
-$(LLIB): brainfuse_lib.o Makefile
+$(LLIB): brainfuse_lib.o Makefile eped1nn/toq_profiles.o
 	$(ARCH) $(LLIB) $<
 
 $(EXEC) : brainfuse_run.c $(LLIB) 
@@ -37,11 +37,14 @@ $(EXEC) : brainfuse_run.c $(LLIB)
 
 all: $(LLIB) $(EXEC) toq_profiles_test
 
-toq_profiles_test: eped1nn/toq_profiles.f90 eped1nn/toq_profiles_test.f90
-	cd eped1nn; $(FC) -o toq_profiles_test toq_profiles.f90 toq_profiles_test.f90
+eped1nn/toq_profiles.o:eped1nn/toq_profiles.f90
+	cd eped1nn; $(FC) -c toq_profiles.f90
+
+toq_profiles_test: eped1nn/toq_profiles.o eped1nn/toq_profiles_test.f90
+	cd eped1nn; $(FC) -o toq_profiles_test toq_profiles.o toq_profiles_test.f90
 
 clean:
-	rm -f *.o  *.a *~ $(EXEC)
+	rm -f *.o  *.a *~ $(EXEC) *.mod eped1nn/*.mod eped1nn/*.o eped1nn/*.a eped1nn/toq_profiles_test
 
 gacode_install:
 	@[ -d $(GACODE_ROOT)/shared/neural ] || mkdir $(GACODE_ROOT)/shared/neural
