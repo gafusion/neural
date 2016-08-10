@@ -7,7 +7,7 @@
 #include <dirent.h>
 
 static unsigned int n_models=2; //number of nn physics models
-static unsigned int verbose=1;
+static unsigned int verbose=0;
 
 // arrays of pointers storing multiple ANNS instances,
 // of multiple ANNS ensembles, for different physics models
