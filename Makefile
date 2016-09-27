@@ -32,8 +32,12 @@ OBJECTS = brainfuse_lib.o brainfuse_exe.o
 $(LLIB): brainfuse_lib.o Makefile eped1nn/toq_profiles.o
 	$(ARCH) $(LLIB) $<
 
+
 $(EXEC) : brainfuse_run.c $(LLIB) 
 	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lfann -lm -L$(FANN_ROOT)/lib/ -I$(FANN_ROOT)/src/include/
+
+%.o : %.c
+	$(CC) $(CFLAGS) -c $< -I./ -I$(FANN_ROOT)/src/include/ 
 
 all: $(LLIB) $(EXEC) toq_profiles_test
 
