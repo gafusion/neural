@@ -5,7 +5,7 @@
   <!-- Basic Page Needs
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta charset="utf-8">
-  <title>Active apps</title>
+  <title>NN explorer</title>
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -25,19 +25,21 @@
 
 </head>
 <body class="">
-
   <div class="docs section wrapper">
     <div class="content">
-       <h1>Active Applications</h1>
-       Current Running NN applications:
-       <ul>
-         {% for item in items %}
-           <li><a href={{ item }}>{{ item[1:] }}</a></li>
-         {% end %}
-       </ul>
+       <h1>Interactive exploration of neural-network models</h1>
+
+        The following web-applications allow the interactive exploration of the EPED1-NN and TGLF-NN neural-network based models for
+        the prediction of the H-mode plasma pedestal structure and of core turbulent transport fluxes (particle, energy, and momentum).
+        The details of the implementations of these models can be found in Ref. [<it>Meneghini IAEA 2017</it>].
+
+        <h2><a href=/eped1nn>EPED1-NN</a> - for the prediction of the H-mode plasma pedestal structure</h2>
+        A neural-network based regression of the <it>EPED1</it> model [<it><a href="http://dx.doi.org/10.1063/1.2436852">Snyder PoP 2009</a></it>].
+
+        <h2><a href=/tglfnn>TGLF-NN</a> - for the prediction of core turbulent transport fluxes</h2>
+        A neural-network based regression of the <it>TGLF</it> model [<it><a href="http://dx.doi.org/10.1063/1.2436852">Staebler PoP 2007</a></it>].
+
     </div>
   </div>
-
-
  </body>
 </html>

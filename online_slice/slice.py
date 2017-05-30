@@ -1,4 +1,5 @@
 import sys, glob, re, os
+os.environ.setdefault('NEURAL', '/Users/meneghini/Coding/neural')
 sys.path.insert(0, os.environ['NEURAL'])
 from brainfuse import *
 import numpy
