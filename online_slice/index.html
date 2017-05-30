@@ -26,18 +26,22 @@
 </head>
 <body class="">
   <div class="docs section wrapper">
-    <div class="content">
+    <div class="content", style="width: 800px">
        <h1>Interactive exploration of neural-network models</h1>
 
-        The following web-applications allow the interactive exploration of the EPED1-NN and TGLF-NN neural-network based models for
-        the prediction of the H-mode plasma pedestal structure and of core turbulent transport fluxes (particle, energy, and momentum).
-        The details of the implementations of these models can be found in Ref. [<it>Meneghini IAEA 2017</it>].
+        <p>As part of the <a href=http://scidac.github.io/atom/introduction.html>AToM</a> US SciDAC project two neural-network (NN) based models were developed:
+        <b>EPED1-NN</b> for the prediction of the H-mode pedestal structure; and <b>TGLF-NN</b> for the prediction of core turbulent transport fluxes.
+        These neural-network models were trained to reproduce the results of the original TGLF and EPED1 theory-based models over a broad range of plasma regimes.</p>
 
-        <h2><a href=/eped1nn>EPED1-NN</a> - for the prediction of the H-mode plasma pedestal structure</h2>
-        A neural-network based regression of the <it>EPED1</it> model [<it><a href="http://dx.doi.org/10.1063/1.2436852">Snyder PoP 2009</a></it>].
+        <p>The resulting EPED1-NN and TGLF-NN models are <b>9 and 5 orders of magnitude faster</b> than running EPED1 and TGLF directly.
+        The following web-applications allow the interactive exploration of these neural-network based models.
+        The details of the implementations of both EPED1-NN and TGLF-NN can be found in Ref. [<it>Meneghini et al. IAEA 2017</it>].</p>
 
-        <h2><a href=/tglfnn>TGLF-NN</a> - for the prediction of core turbulent transport fluxes</h2>
-        A neural-network based regression of the <it>TGLF</it> model [<it><a href="http://dx.doi.org/10.1063/1.2436852">Staebler PoP 2007</a></it>].
+        <h2><a href=/eped1nn>EPED1-NN</a> - H-mode pedestal structure</h2>
+        A neural-network based regression of the <b>EPED1</b> model [<it><a href="http://dx.doi.org/10.1063/1.2436852">Snyder et al. PoP 2009</a></it>].
+
+        <h2><a href=/tglfnn>TGLF-NN</a> - Core turbulent transport fluxes</h2>
+        A neural-network based regression of the <b>TGLF</b> model [<it><a href="http://dx.doi.org/10.1063/1.2436852">Staebler et al. PoP 2007</a></it>].
 
     </div>
   </div>
