@@ -70,7 +70,7 @@ for k, s in enumerate(outputNames):
                                    visible=False, color=colorblind_line_cycle[k])  # , legend=s)
     outputs[s]['patch'] = plot.patch('x', 'y', source=outputs[s]['psource'], fill_alpha=0.2, line_width=0, line_alpha=0,
                                      visible=False, color=colorblind_line_cycle[k])
-    outputs[s]['label'] = Label(x=0, y=0, text=s, x_offset=0, y_offset=0, render_mode='canvas', visible=False,
+    outputs[s]['label'] = Label(x=0, y=0, text=mapper.get(s,s), x_offset=0, y_offset=0, render_mode='canvas', visible=False,
                                 text_color=colorblind_line_cycle[k])
     plot.add_layout(outputs[s]['label'])
 
@@ -107,8 +107,8 @@ def update_data(attrname, old, new, nets, svar):
         for s in slider:
             if s == last['slider']:
                 indata[s] = numpy.linspace(slider[s]['start'], slider[s]['end'], N)
-                plot.xaxis.axis_label = last['slider']
-                hold_button.labels[0] = 'keep plotting as function of %s' % last['slider']
+                plot.xaxis.axis_label = mapper.get(last['slider'],last['slider'])
+                hold_button.labels[0] = 'keep plotting as function of %s' % mapper.get(last['slider'],last['slider'])
             else:
                 indata[s] = numpy.array([slider[s]['value']] * N)
 

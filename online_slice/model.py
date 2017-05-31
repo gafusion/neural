@@ -97,10 +97,10 @@ elif model == 'tglfnn':
             'OUT_tur_PARTICLE_FLUX_1'    : 'TGLF Gamma_e',
             'OUT_tur_STRESS_TOR_i'       : 'TGLF Pi_i',
 
-            'OUT_ENERGY_FLUX_1'          : 'TGLF Q_e',
-            'OUT_ENERGY_FLUX_i'          : 'TGLF Q_i',
-            'OUT_PARTICLE_FLUX_1'        : 'TGLF Gamma_e',
-            'OUT_STRESS_TOR_i'           : 'TGLF Pi_i',
+            'OUT_ENERGY_FLUX_1'          : 'Q_e',
+            'OUT_ENERGY_FLUX_i'          : 'Q_i',
+            'OUT_PARTICLE_FLUX_1'        : 'Gamma_e',
+            'OUT_STRESS_TOR_i'           : 'Pi_i',
 
             'OUT_tot_ENERGY_FLUX_1'      : 'TGLF+NEO Q_e',
             'OUT_tot_ENERGY_FLUX_i'      : 'TGLF+NEO Q_i',
