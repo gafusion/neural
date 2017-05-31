@@ -177,9 +177,9 @@ cases_dropdown.on_change('value', lambda attrname, old, new, nets=nets, svar='__
 
 # Set up layouts and add to document
 if len(cases)>1:
-    controls = widgetbox(*([cases_dropdown]+[slider[s]['slider'] for s in sorted(slider.keys())]))
+    controls = widgetbox(*([cases_dropdown]+[slider[s]['slider'] for s in sorted(slider.keys(),key=lambda x:mapper.get(x,x).lower())]))
 else:
-    controls = widgetbox(*[slider[s]['slider'] for s in sorted(slider.keys())])
+    controls = widgetbox(*[slider[s]['slider'] for s in sorted(slider.keys(),key=lambda x:mapper.get(x,x).lower())])
 curdoc().add_root(out_buttons)
 curdoc().add_root(row(controls, column(plot, hold_button)))
 curdoc().title = title

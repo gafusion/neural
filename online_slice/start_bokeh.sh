@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export NEURAL=$HOME/neural
-export LD_LIBRARY_PATH=$HOME/fann/src
+export NEURAL=$PWD/..
+export LD_LIBRARY_PATH=$PWD/../../fann/src
 
 mkdir -p eped1nn
 ln -sf $PWD/slice.py eped1nn/main.py
@@ -20,3 +20,4 @@ sudo cp index.html /opt/local/Library/Frameworks/Python.framework/Versions/2.7/l
 
 models=`ls -d */`
 bokeh serve $models --allow-websocket-origin gadb-harvest.ddns.net --port 5100
+#bokeh serve $models
