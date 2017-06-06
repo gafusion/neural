@@ -7,6 +7,8 @@ All code sources are copyrighted by the main author `Orso Meneghini <mailto:mene
     
 * TGLF `Gary Staebler <mailto:staebler@fusion.gat.com>`_
 
+* NEO `Emily Belli <mailto:belli@fusion.gat.com>`_ and `Jeff Candy <mailto:candy@fusion.gat.com>`_
+
 for the respective machine learning models.
 
 In turn for access to the source code and the machine learning models, the recipient agrees:
