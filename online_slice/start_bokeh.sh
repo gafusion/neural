@@ -3,17 +3,16 @@
 export NEURAL=$PWD/..
 export LD_LIBRARY_PATH=$PWD/../../fann/src
 
-mkdir -p eped1nn
-ln -sf $PWD/slice.py eped1nn/main.py
-ln -sf $PWD/model.py eped1nn/model.py
+declare -a arr=("eped1nn" "tglfnn" "neojbsnn-D_C" "neojbsnn-D_Z" "neojbsnn-DT_Z")
 
-mkdir -p tglfnn
-ln -sf $PWD/slice.py tglfnn/main.py
-ln -sf $PWD/model.py tglfnn/model.py
+for i in "${arr[@]}"
+do
+    echo "$i"
+    mkdir -p $i
+    ln -sf $PWD/slice.py $i/main.py
+    ln -sf $PWD/model.py $i/model.py
 
-mkdir -p neojbsnn
-ln -sf $PWD/slice.py neojbsnn/main.py
-ln -sf $PWD/model.py neojbsnn/model.py
+done
 
 sudo cp index.html /usr/local/lib/python2.7/site-packages/bokeh/server/views/app_index.html
 sudo cp index.html /opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/bokeh/server/views/app_index.html

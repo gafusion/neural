@@ -140,21 +140,19 @@ elif model == 'tglfnn':
     positive_inputs=False
     force_vmin=numpy.nan
 
-elif model == 'neojbsnn':
+elif model.startswith('neojbsnn'):
     title =  'NEOjbs-NN'
-    path=os.environ['NEURAL']+'/neojbsnn/models/random_sampling/brainfuse_*.net'
-    mapper={'OUT_NEO_CnC':'CnC_NEO',
-            'OUT_NEO_CnD':'CnD_NEO',
-            'OUT_NEO_Cne':'Cne_NEO',
-            'OUT_NEO_CtC':'CtC_NEO',
-            'OUT_NEO_CtD':'CtD_NEO',
-            'OUT_NEO_Cte':'Cte_NEO',
-            'OUT_SAU_CnC':'CnC_Sauter',
-            'OUT_SAU_CnD':'CnD_Sauter',
-            'OUT_SAU_Cne':'Cne_Sauter',
-            'OUT_SAU_CtC':'CtC_Sauter',
-            'OUT_SAU_CtD':'CtD_Sauter',
-            'OUT_SAU_Cte':'Cte_Sauter'}
+
+    path=os.environ['NEURAL']+'/neojbsnn/models/'+model.split('-')[1]+'/brainfuse_*.net'
+
+    mapper={}
+
+    if model.split('-')[1]!='D_C':
+        cases['Carbon']={'log10_mi2/mD':numpy.log10(12/2.),
+                         'log10_zi2':numpy.log10(6)}
+
+        cases['Tungsten']={'log10_mi2/mD':numpy.log10(184/2.),
+                           'log10_zi2':numpy.log10(74)}
 
     positive_inputs=False
     force_vmin=numpy.nan
