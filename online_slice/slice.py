@@ -19,6 +19,9 @@ colorblind_line_cycle = ['#377eb8', '#ff7f00', '#4daf4a', '#f781bf', '#a65628', 
 # load model details
 execfile('model.py') in locals(), globals()
 
+def mapper_function(x):
+    return re.sub('^OUT_','',mapper.get(x,x))
+
 # load NNs
 nets = {}
 for k, file in enumerate(glob.glob(path)):
@@ -45,11 +48,11 @@ for k, s in enumerate(inputNames):
     slider[s] = dict(value=cases.values()[0].get(s,scale_mean_in[k]),
                      start=numpy.nanmax([positive_inputs_value, scale_mean_in[k] - n * scale_deviation_in[k]]),
                      end=scale_mean_in[k] + n * scale_deviation_in[k], step=scale_deviation_in[k] / 100.)
-    slider[s]['slider'] = Slider(title=mapper.get(s,s), **slider[s])
+    slider[s]['slider'] = Slider(title=mapper_function(s), **slider[s])
 hold_button = CheckboxButtonGroup(labels=["hold"], active=[])
 
 # Set up outputs
-out_buttons = CheckboxButtonGroup(labels=[mapper.get(s,s) for s in outputNames], active=[0])
+out_buttons = CheckboxButtonGroup(labels=[mapper_function(s) for s in outputNames], active=[0])
 
 # Set up base plot
 plot = figure(plot_height=800, plot_width=800, title=title,
@@ -70,7 +73,7 @@ for k, s in enumerate(outputNames):
                                    visible=False, color=colorblind_line_cycle[k])  # , legend=s)
     outputs[s]['patch'] = plot.patch('x', 'y', source=outputs[s]['psource'], fill_alpha=0.2, line_width=0, line_alpha=0,
                                      visible=False, color=colorblind_line_cycle[k])
-    outputs[s]['label'] = Label(x=0, y=0, text=mapper.get(s,s), x_offset=0, y_offset=0, render_mode='canvas', visible=False,
+    outputs[s]['label'] = Label(x=0, y=0, text=mapper_function(s), x_offset=0, y_offset=0, render_mode='canvas', visible=False,
                                 text_color=colorblind_line_cycle[k])
     plot.add_layout(outputs[s]['label'])
 
@@ -93,7 +96,8 @@ def update_data(attrname, old, new, nets, svar):
     # update sliders
     if svar=='__cases__':
         for s in slider:
-            slider[s]['value'] = slider[s]['slider'].value = cases[cases_dropdown.value][s]
+            if s in cases[cases_dropdown.value]:
+                slider[s]['value'] = slider[s]['slider'].value = cases[cases_dropdown.value][s]
 
     else:
         for s in slider:
@@ -107,8 +111,8 @@ def update_data(attrname, old, new, nets, svar):
         for s in slider:
             if s == last['slider']:
                 indata[s] = numpy.linspace(slider[s]['start'], slider[s]['end'], N)
-                plot.xaxis.axis_label = mapper.get(last['slider'],last['slider'])
-                hold_button.labels[0] = 'keep plotting as function of %s' % mapper.get(last['slider'],last['slider'])
+                plot.xaxis.axis_label = mapper_function(last['slider'])
+                hold_button.labels[0] = 'keep plotting as function of %s' % mapper_function(last['slider'])
             else:
                 indata[s] = numpy.array([slider[s]['value']] * N)
 
@@ -177,9 +181,9 @@ cases_dropdown.on_change('value', lambda attrname, old, new, nets=nets, svar='__
 
 # Set up layouts and add to document
 if len(cases)>1:
-    controls = widgetbox(*([cases_dropdown]+[slider[s]['slider'] for s in sorted(slider.keys(),key=lambda x:mapper.get(x,x).lower())]))
+    controls = widgetbox(*([cases_dropdown]+[slider[s]['slider'] for s in sorted(slider.keys(),key=lambda x:mapper_function(x).lower())]))
 else:
-    controls = widgetbox(*[slider[s]['slider'] for s in sorted(slider.keys(),key=lambda x:mapper.get(x,x).lower())])
+    controls = widgetbox(*[slider[s]['slider'] for s in sorted(slider.keys(),key=lambda x:mapper_function(x).lower())])
 curdoc().add_root(out_buttons)
 curdoc().add_root(row(controls, column(plot, hold_button)))
 curdoc().title = title
