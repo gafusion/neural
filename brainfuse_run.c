@@ -18,44 +18,50 @@ int main(int argc, char *argv[])
   fann_type *data_in;
   const char *runFile = argv[argc-1];
   const char *annFiles = argv[argc-1];
-  FILE *fp1, *fp2;
+  FILE *fi, *fa, *fs;
 
   // Initialize arrays
   load_anns(0,argv[1],"brainfuse");
-  load_anns(1,argv[1],"brainfuse");
-  load_anns(1,argv[1],"brainfuse");
 
-  // Read input data
+  // Open I/O files
   printf("Reading data from file %s: ", runFile);
-  fp1 = fopen(runFile, "r");
-  fscanf(fp1, "%u\n", &num_data);
+  fi = fopen(runFile, "r");
+  fscanf(fi, "%u\n", &num_data);
+  fa = fopen("output.avg", "w");
+  fs = fopen("output.std", "w");
+  fprintf(fa,"%u\n",num_data);
+  fprintf(fs,"%u\n",num_data);
+
+  // Print info
   printf("%u runs %d inputs %d ouputs\n", num_data, get_anns_num_input(), get_anns_num_output());
+
+  // Initialize array
   data_in = malloc(get_anns_num_input() * sizeof(fann_type));
-  for(j = 0; j < get_anns_num_input(); j++){
-    fscanf(fp1, FANNSCANF " ", &data_in[j]);
+  for(n = 0; n < num_data; n++){
+
+      // Read input data
+      for(j = 0; j < get_anns_num_input(); j++){
+        fscanf(fi, FANNSCANF " ", &data_in[j]);
+      }
+
+      // Load inputs
+      load_anns_inputs(data_in);
+
+      // Run anns
+      run_anns();
+
+      // print and write
+      for(j = 0; j < get_anns_num_output(); j++){
+          printf("%f (%f) ",get_anns_avg(j), get_anns_std(j) );
+          fprintf(fa,"%f ",get_anns_avg(j));
+          fprintf(fs,"%f ",get_anns_std(j));
+      }
+      printf("\n");
+      fprintf(fa,"\n");
+      fprintf(fs,"\n");
   }
-  fclose(fp1);
-
-  // Load inputs
-  load_anns_inputs(data_in);
-
-  // Run anns
-  run_anns();
-
-  // print and write
-  fp1 = fopen("output.avg", "w");
-  fp2 = fopen("output.std", "w");
-  fprintf(fp1,"%u\n",num_data);
-  fprintf(fp2,"%u\n",num_data);
-  for(j = 0; j < get_anns_num_output(); j++){
-      printf("%f (%f) ",get_anns_avg(j), get_anns_std(j) );
-      fprintf(fp1,"%f ",get_anns_avg(j));
-      fprintf(fp2,"%f ",get_anns_std(j));
-  }
-  printf("\n");
-  fprintf(fp1,"\n");
-  fprintf(fp2,"\n");
-  fclose(fp1);
-  fclose(fp2);
+  fclose(fi);
+  fclose(fa);
+  fclose(fs);
   return 0;
 }
