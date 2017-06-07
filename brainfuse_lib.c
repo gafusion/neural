@@ -7,7 +7,7 @@
 #include <dirent.h>
 
 static unsigned int n_models=2; //number of nn physics models
-static unsigned int verbose=0;
+static unsigned int verbose=0;  //verbose output
 
 // arrays of pointers storing multiple ANNS instances,
 // of multiple ANNS ensembles, for different physics models
@@ -129,16 +129,6 @@ int load_anns(int global_nn_model, char *directory, char *basename){
     loaded_anns[model]=1;
   }
 
-  // Initialize memory
-  for(j = 0; j < anns[model][0]->num_input; j++){
-    data_avg[model]->input[0][j]=0.;
-    data_std[model]->input[0][j]=0.;
-  }
-  for(j = 0; j < anns[model][0]->num_output; j++){
-    data_avg[model]->output[0][j]=0.;
-    data_std[model]->output[0][j]=0.;
-  }
-
   return n;
 }
 
@@ -156,11 +146,18 @@ int load_anns__(int *global_nn_model, char *directory, char *basename){
 int load_anns_inputs(fann_type *data_in){
   unsigned int j;
   if (verbose)  printf("Reading ANNs input data %d inputs %d ouputs\n", anns[model][0]->num_input, anns[model][0]->num_output);
+  // load inputs
   for(j = 0; j < anns[model][0]->num_input; j++){
     if (verbose) printf("in  %02d: %3.3f\n",j+1,data_in[j]);
     data_avg[model]->input[0][j]=(fann_type)data_in[j];
     data_std[model]->input[0][j]=data_avg[model]->input[0][j];
     data_nrm[model]->input[0][j]=data_avg[model]->input[0][j];
+  }
+  // Initialize outputs to zero
+  for(j = 0; j < anns[model][0]->num_output; j++){
+    data_avg[model]->output[0][j]=0.;
+    data_std[model]->output[0][j]=0.;
+    data_nrm[model]->output[0][j]=0.;
   }
   if (verbose) printf("\n");
   return 0;
