@@ -1,4 +1,3 @@
-========
 EPED1-NN
 ========
 
@@ -59,7 +58,6 @@ The format of the input is for example in `eped1nn/samples/2015check.txt`.
 
 The output of the eped1nn_eped1 will append `out` to the input filename: `eped1nn/samples/2015check_out.txt`
 
-============
 TOQ-profiles
 ============
 The EPED1 model uses model profiles within TOQ for the density and temperature profiles.
