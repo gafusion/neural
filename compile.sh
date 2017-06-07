@@ -1,8 +1,7 @@
 #!/bin/bash
-#cp ../brainfuse/brainfuse_run.c ./
 
 make clean
-make brainfuse_run.exe
+make brainfuse_run.exe toq_profiles_test
 
 cd tglfnn/samples
 rm -f output.avg
