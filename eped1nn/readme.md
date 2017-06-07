@@ -1,27 +1,20 @@
-EPED1NN
-======
+========
+EPED1-NN
+========
 
-Engine for neural-network powered pedestal predictions
+There are different scripts to run the EPED1-NN model
 
-Getting started
----------------
-Run EPED1NN with:
-    
-    eped1nn model_name input.dat
+Low level
+---------
+at the lowest level one can call the `brainfuse_run.exe` binary and pass the list
+of NN files (generally called brainfuse_XX.net) and an input file. For example:
 
-For example:
+    cd eped1nn/samples
+    ../../brainfuse_run.exe ../models/EPED1_H_superH input_sample.dat
 
-    cd samples
-    ../eped1nn_eped1 EPED1_D3D 2015check.txt
+here `EPED1_H_superH` is one of the models under the `models` directory
 
-Pedestal models
----------------
-Possible `model_name` are the directory names contained in the models directory
-e.g. EPED1_ALL
-
-raw inputs format
--------------
-The `input.dat` has the format of:
+The `input_sample.dat` has the format of:
 
     N1
     i1 i2 i3 i4 i5 i6 i7 i8 i9
@@ -33,15 +26,6 @@ where:
     N1 number of runs
     i.. inputs (N1 lines)
 
-EPED1 input format
-------------------
-The `eped1nn_eped1` script will automatically make the conversion from
-the EPED1 input file format to the EPED1NN file format.
-
-    eped1nn_epde1 EPED1_D3D eped1_input_file
-
-raw outputs format
---------------
 Upon run the `output.dat` and `output.std` files will be generated in the
 current working directory with the EPED1NN prediction and its standard deviation.
 Both files have format:
@@ -56,45 +40,28 @@ where::
     N1 number of runs
     o.. outputs (N1 lines)
 
-The `input.lim` file contains the values of the inputs normalized to the training range
-(assuming a normal distribution of the training data). The values in this file cat be used
-to check that values provided by the user are within the training range of the model. e.g:
+Python wrapper
+--------------
+The `eped1nn` Python script wraps the `brainfuse_run.exe` executable.
+This Python script also generates a `epednn.profiles` file.
 
-    +1.0 means the input value is +1.0 standard deviation away from the mean of the training range
-    -1.3 means the input value is -1.3 standard deviation away from the mean of the training range
-    -0.0 means the input value is right in the middle (mean) of the training range
+    cd eped1nn/samples
+    ../eped1nn EPED1_H_superH input_sample.dat
+    
 
-A rule of thumb is that the model is applicable where the magnitude of the normalized inputs is <2
+Snyder EPED1 interface
+----------------------
+The `eped1nn_eped1` Python script mimics the I/O of Phil Snyder original IDL EPED1 worflow.
+The format of the input is for example in `eped1nn/samples/2015check.txt`.
 
-The `input.lim` file has format:
+    cd eped1nn/samples
+    ../eped1nn_eped1 EPED1_H_superH 2015check.txt
 
-    N1
-    i1 i2 i3 i4 i5 i6 i7 i8 i9
-    i1 i2 i3 i4 i5 i6 i7 i8 i9
-    ...
+The output of the eped1nn_eped1 will append `out` to the input filename: `eped1nn/samples/2015check_out.txt`
 
-where:
-
-    N1 number of runs
-    i.. inputs (N1 lines)
-
-On GA workstations
-------------------
-Set in your .login file
-
-    setenv FANN_ROOT /u/meneghini/fann
-
-Installation
-------------
-Install the FANN library:
-
-    git clone git@github.com:libfann/fann.git
-    cd fann
-    cmake .
-    make
-
-Set in your .login file:
-
-    setenv FANN_ROOT loation_where_fann_was_cloned
-
-Run `./compile.sh` script in the EPED1NN folder
+============
+TOQ-profiles
+============
+The EPED1 model uses model profiles within TOQ for the density and temperature profiles.
+The TOQ routine for the profiles has been extracted and is available in `toq_profiles.f90`,
+while the `toq_profiles_test.f90` is a sample driver showing how the routine is called.
