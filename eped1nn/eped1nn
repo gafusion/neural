@@ -34,11 +34,11 @@ for line in open(net_files[0], 'Ur').readlines():
     if 'output_names' in line:
         outputNames = eval((line.replace('output_names=', '[') + ']').replace("' '", "','"))
 
-os.system("%s/brainfuse_run.exe %s/models/%s/brainfuse_* %s" % (BRAINFUSE_ROOT, EPED1NN_ROOT, sys.argv[1], sys.argv[2]))
+os.system("%s/brainfuse_run.exe %s/models/%s %s" % (BRAINFUSE_ROOT, EPED1NN_ROOT, sys.argv[1], sys.argv[2]))
 
-inplines = '\n'.join(open('input.dat', 'Ur').readlines()[1:])
-avglines = '\n'.join(open('output.avg', 'Ur').readlines()[1:])
-stdlines = '\n'.join(open('output.std', 'Ur').readlines()[1:])
+inplines = ''.join(open(sys.argv[2], 'Ur').readlines()[1:])
+avglines = ''.join(open('output.avg', 'Ur').readlines()[1:])
+stdlines = ''.join(open('output.std', 'Ur').readlines()[1:])
 
 tmp = atleast_2d(loadtxt(StringIO(unicode(inplines))))
 inputs = {}
