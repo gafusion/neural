@@ -33,7 +33,7 @@ $(LLIB): brainfuse_lib.o Makefile eped1nn/toq_profiles.o
 	$(ARCH) $(LLIB) $<
 
 $(EXEC) : brainfuse_run.c $(LLIB) 
-	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lfann -lm -L$(FANN_ROOT)/lib/ -I$(FANN_ROOT)/src/include
+	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lfann -lm -L$(FANN_ROOT)/lib/ -I$(FANN_ROOT)/src/include -I$(FANN_ROOT)/include
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -I./ -I$(FANN_ROOT)/src/include -I$(FANN_ROOT)/include
