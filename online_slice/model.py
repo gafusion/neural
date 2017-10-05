@@ -145,14 +145,20 @@ elif model.startswith('neojbsnn'):
 
     path=os.environ['NEURAL']+'/neojbsnn/models/'+model.split('-')[1]+'/brainfuse_*.net'
 
-    mapper={}
+    mapper={'in1_eps':'epsilon',
+            'in2_q':'q',
+            'in4_n2':'ni1/ne',
+            'in5_t2':'ti1/te',
+            'in6_geo':'ft',
+            'in3_nu':'nuee'
+            }
 
-    if model.split('-')[1]!='D_C':
-        cases['Carbon']={'log10_mi2/mD':numpy.log10(12/2.),
-                         'log10_zi2':numpy.log10(6)}
+    #if model.split('-')[1]!='D_C':
+    #    cases['Carbon']={'log10_mi2/mD':numpy.log10(12/2.),
+    #                     'log10_zi2':numpy.log10(6)}
 
-        cases['Tungsten']={'log10_mi2/mD':numpy.log10(184/2.),
-                           'log10_zi2':numpy.log10(74)}
+    #    cases['Tungsten']={'log10_mi2/mD':numpy.log10(184/2.),
+    #                       'log10_zi2':numpy.log10(74)}
 
     positive_inputs=False
     force_vmin=numpy.nan

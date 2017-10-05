@@ -17,7 +17,7 @@ colorblind_line_cycle = ['#377eb8', '#ff7f00', '#4daf4a', '#f781bf', '#a65628', 
                          '#dede00'] * 20
 
 # load model details
-execfile('model.py') in locals(), globals()
+execfile('./model.py') in locals(), globals()
 
 def mapper_function(x):
     return re.sub('^OUT_','',mapper.get(x,x))
