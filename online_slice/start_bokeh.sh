@@ -3,7 +3,7 @@
 export NEURAL=$PWD/..
 export LD_LIBRARY_PATH=$PWD/../../fann/src
 
-declare -a arr=("eped1nn" "tglfnn" "neojbsnn-D_C" "neojbsnn-D_C_geo")
+declare -a arr=("eped1nn" "tglfnn")
 
 for i in "${arr[@]}"
 do
