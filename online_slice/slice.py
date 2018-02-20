@@ -38,7 +38,7 @@ for k, s in enumerate(inputNames):
 # Set up inputs
 cases_dropdown = Dropdown(label="Cases", menu=[(case,case) for case in cases.keys()])
 
-n = 2.
+n = 5.
 slider = {}
 for k, s in enumerate(inputNames):
     if positive_inputs:

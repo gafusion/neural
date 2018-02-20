@@ -8,9 +8,9 @@ cases=OrderedDict()
 
 print model
 
-if model == 'eped1nn':
+if model.startswith('eped1nn'):
     title =  'EPED1-NN'
-    path=os.environ['NEURAL']+'/eped1nn/models/EPED1_H_superH/brainfuse_*.net'
+    path=os.environ['NEURAL']+'/eped1nn/models/'+model.split('-')[1]+'/brainfuse_*.net'
     mapper={'a':'a',
             'bt':'B_t',
             'ip':'I_p',
@@ -42,6 +42,23 @@ if model == 'eped1nn':
                      'mi':12,
                      'zi':6}
 
+    cases['DIII-D RMP ELM suppressed']={
+                     'ip':1.62,
+                     'bt':1.91,
+                     'r' :1.73,
+                     'a' :0.6,
+                     'kappa':1.8,
+                     'delta':0.49,
+                     'neped':2.09,
+                     'betan':1.86,
+                     'zeffped':2.32,
+                     'i_coil':2215.21,
+                     'rotation':-19.98,
+                     'm':2,
+                     'z':1,
+                     'mi':12,
+                     'zi':6}
+
     cases['ITER']={  'ip':15,
                      'bt':5.3,
                      'r':6.2,
@@ -56,38 +73,39 @@ if model == 'eped1nn':
                      'mi':12,
                      'zi':6}
 
-    cases['ITER half field']={  'ip':15/2.,
-                                'bt':5.3/2.,
-                                'r':6.2,
-                                'a':2,
-                                'kappa':1.85,
-                                'delta':0.485,
-                                'neped':10,
-                                'betan':2.0,
-                                'zeffped':1.7,
-                                'm':2.5,
-                                'z':1,
-                                'mi':12,
-                                'zi':6}
+    cases['ITER half field']={
+                     'ip':15/2.,
+                     'bt':5.3/2.,
+                     'r':6.2,
+                     'a':2,
+                     'kappa':1.85,
+                     'delta':0.485,
+                     'neped':10,
+                     'betan':2.0,
+                     'zeffped':1.7,
+                     'm':2.5,
+                     'z':1,
+                     'mi':12,
+                     'zi':6}
 
-    cases['JET']={'ip':2.0,
-                  'bt':1.7,
-                  'r':2.9,
-                  'a':0.92,
-                  'kappa':1.7,
-                  'delta':0.4,
-                  'neped':4.0,
-                  'betan':2.0,
-                  'zeffped':1.7,
-                  'm':2,
-                  'z':1,
-                  'mi':12,
-                  'zi':6}
+    cases['JET']={   'ip':2.0,
+                     'bt':1.7,
+                     'r':2.9,
+                     'a':0.92,
+                     'kappa':1.7,
+                     'delta':0.4,
+                     'neped':4.0,
+                     'betan':2.0,
+                     'zeffped':1.7,
+                     'm':2,
+                     'z':1,
+                     'mi':12,
+                     'zi':6}
 
-    positive_inputs=True
-    force_vmin=0
+    positive_inputs = (model.split('-')[1] != 'D3D_RMP')
+    force_vmin = numpy.nan
 
-elif model == 'tglfnn':
+elif  model.startswith('tglfnn'):
     title =  'TGLF-NN'
 
     path=os.environ['NEURAL']+'/tglfnn/models/DIIID_ion_stiffness_60_rotation/brainfuse_*.net'
