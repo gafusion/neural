@@ -7,7 +7,7 @@ import numpy as np
 from numpy import *
 import struct
 
-serve_port=8887
+serve_port=8883
 
 #=======================
 # helper functions
@@ -16,6 +16,16 @@ def send_data(sock, path, data):
     payload='{path}::{shape}::[{data}]'.format(path=path,
                                                 shape=data.shape,
                                                 data=','.join(map(lambda x:'%f'%x,data.flatten())))
+    return send_msg(sock, payload)
+
+def send_ask_info(sock, path):
+    payload='{path}'.format(path=path)
+    return send_msg(sock, payload)
+
+def send_info(sock, path, x_names, y_names):
+    payload='{path}::{x_names}::{y_names}'.format(path=path,
+                                                  x_names=repr(map(str,x_names)),
+                                                  y_names=repr(map(str,y_names)))
     return send_msg(sock, payload)
 
 def send_msg(sock, msg):
@@ -27,6 +37,14 @@ def recv_data(sock):
     data=recv_msg(sock)
     path,shape,data=data.split('::')
     return path, np.reshape(eval(data),eval(shape))
+
+def recv_ask_info(sock):
+    return recv_msg(sock)
+
+def recv_info(sock):
+    data=recv_msg(sock)
+    path,x_names,y_names=data.split('::')
+    return path, eval(x_names), eval(y_names)
 
 def recv_msg(sock):
     # Read message length and unpack it into an integer
@@ -50,7 +68,7 @@ def recvall(sock, n):
 #=======================
 # client
 #=======================
-class tf_connect(object):
+class btf_connect(object):
     def __init__(self, host='localhost', port=serve_port, path=None):
         self.host = host
         self.port = port
@@ -66,43 +84,58 @@ class tf_connect(object):
         self.sock.close()
 
     def run(self, input):
-
+        send_ask_info(self.sock, self.path)
+        path,self.x_names,self.y_names=recv_info(self.sock)
+        input=np.array([input[name][:10] for name in self.x_names]).T
+        #print input.shape
         send_data(self.sock, self.path, input)
         path,output=recv_data(self.sock)
-
-        print "Sent:     {}".format(input)
-        print "Received:     {}".format(output)
+        #print output.shape
+        output={name:output[:,k] for k,name in enumerate(self.y_names)}
+        return output
 
 #=======================
 # server
 #=======================
 if __name__ == "__main__":
     import tensorflow as tf
+    from tensorflow.python.platform import gfile
 
     class model(tf.Session):
         def __init__(self, target='', graph=None, config=None, path=None):
             tf.Session.__init__(self, target=target, graph=graph, config=config)
             self.__enter__()
-            graph=tf.Graph()
-            tf.saved_model.loader.load(self,[tf.saved_model.tag_constants.SERVING],path)
-            self.y = tf.get_collection('nn_model')
+            with gfile.FastGFile(path, 'rb') as f:
+                graph_def = tf.GraphDef()
+                graph_def.ParseFromString(f.read())
+            self.y, self.x_names, self.y_names = tf.import_graph_def(graph_def, return_elements=['unnormalized_nn/y:0',
+                                                                                                 'x_names:0',
+                                                                                                 'y_names:0'], name='')
+            self.x_names=self.x_names.eval()
+            self.y_names=self.y_names.eval()
 
-        def runme(self,input):
-            return self.run(self.y, feed_dict={'x:0': input,'keep_prob:0':1.0})[0]
+        def activate(self,input):
+            return self.run(self.y, feed_dict={'x:0': input,'keep_prob:0':1.0})
 
     models={}
     def activate(path, input):
         if path not in models:
             models[path]=model(path=path)
-        return models[path].runme(input)
+        if input is None:
+            return models[path].x_names,models[path].y_names
+        else:
+            return models[path].activate(input)
 
     class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
         def handle(self):
             print("{} wrote:".format(self.client_address[0]))
+            path=recv_ask_info(self.request)
+            x_names,y_names=activate(path=path,input=None)
+            #print x_names
+            send_info(self.request,path,x_names,y_names)
+            #print x_names
             path,input=recv_data(self.request)
-            print path
-            print input
             output=activate(path=path,input=input)
             send_data(self.request,path,output)
 
