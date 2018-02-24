@@ -11,6 +11,7 @@
 char btf_model[256];
 char *pToken[100];
 char btf_host[100];
+char btf_ip[15];
 int  btf_port=8882;
 int  btf_verbose=0;
 int  btf_sendline_n=65507;
@@ -55,56 +56,6 @@ int set_btf_verbose_(int *verbose){
 int set_btf_verbose__(int *verbose){
   int verbose_ = *verbose;
   set_btf_verbose(verbose_);
-  return 0;
-}
-
-////payload float array
-int set_btf_payload_flt_array(char *btf_sendline, float *data, int len){
-  int i;
-  char datastr[65507];
-  sprintf(datastr,"[");
-  for(i = 0; i < len-1; i++){
-    sprintf(datastr,"%s%g,",datastr,*(data+i));
-  }
-  sprintf(datastr,"%s%g]",datastr,*(data+len-1));
-  sprintf(btf_sendline,"::(1,%d)::%s",len,datastr);
-  return 0;
-}
-
-int set_btf_payload_flt_array_(char *btf_sendline, float *data, int *len){
-  int len_ = *len;
-  set_btf_payload_flt_array(btf_sendline,data,len_);
-  return 0;
-}
-
-int set_btf_payload_flt_array__(char *btf_sendline, float *data, int *len){
-  int len_ = *len;
-  set_btf_payload_flt_array(btf_sendline,data,len_);
-  return 0;
-}
-
-////payload double array
-int set_btf_payload_dbl_array(char *btf_sendline, double *data, int len){
-  int i;
-  char datastr[65507];
-  sprintf(datastr,"[");
-  for(i = 0; i < len-1; i++){
-    sprintf(datastr,"%s%g,",datastr,*(data+i));
-  }
-  sprintf(datastr,"%s%g]",datastr,*(data+len-1));
-  sprintf(btf_sendline,"::(1,%d)::%s",len,datastr);
-  return 0;
-}
-
-int set_btf_payload_dbl_array_(char *btf_sendline, double *data, int *len){
-  int len_ = *len;
-  set_btf_payload_dbl_array(btf_sendline,data,len_);
-  return 0;
-}
-
-int set_btf_payload_dbl_array__(char *btf_sendline, double *data, int *len){
-  int len_ = *len;
-  set_btf_payload_dbl_array(btf_sendline,data,len_);
   return 0;
 }
 
@@ -164,21 +115,8 @@ int set_btf_model__(char *model){
   return 0;
 }
 
-int get_btf_model(char *model, int len){
-  sprintf(model,"%s",btf_model);
-  return 0;
-}
-
-int get_btf_model_(char *model, int *len){
-  return get_btf_model(model, *len);
-}
-
-int get_btf_model__(char *model, int *len){
-  return get_btf_model(model, *len);
-}
-
 //init
-int init_btf(char *model, char *btf_sendline, int n){
+int init_btf(char *model){
   if (getenv("BTF_VERBOSE")!=NULL)
     set_btf_verbose(atoi(getenv("BTF_VERBOSE")));
   else
@@ -190,6 +128,7 @@ int init_btf(char *model, char *btf_sendline, int n){
     set_btf_host("localhost");
     //set_btf_host("gadb-harvest.ddns.net");
   }
+  hostname_to_ip(btf_host, btf_ip);
 
   if (getenv("BTF_PORT")!=NULL){
     set_btf_port(atoi(getenv("BTF_PORT")));
@@ -202,24 +141,16 @@ int init_btf(char *model, char *btf_sendline, int n){
   else if (model[0]!='\0')
     set_btf_model(model);
 
-  btf_sendline_n=n;
-  memset(btf_sendline, 0, btf_sendline_n);
-
-  if (btf_verbose)
-    printf("===btf starts===\n");
-
   return 0;
 }
 
-int init_btf_(char *model, char *btf_sendline, int *n){
-  int n_ = *n;
-  init_btf(model,btf_sendline,n_);
+int init_btf_(char *model){
+  init_btf(model);
   return 0;
 }
 
-int init_btf__(char *model, char *btf_sendline, int *n){
-  int n_ = *n;
-  init_btf(model,btf_sendline,n_);
+int init_btf__(char *model){
+  init_btf(model);
   return 0;
 }
 
@@ -230,8 +161,10 @@ void ReadXBytes(int socket, unsigned int x, void* buffer){
     int result;
     while (bytesRead < x){
         result = read(socket, buffer + bytesRead, x - bytesRead);
-        if (result < 1 )
-            printf("error\n");
+        if (result < 1 ){
+            printf("error on read\n");
+            break;
+        }
         bytesRead += result;
     }
 }
@@ -241,8 +174,10 @@ void WriteXBytes(int socket, unsigned int x, void* buffer){
     int result;
     while (bytesWrite < x) {
         result = write(socket, buffer + bytesWrite, x - bytesWrite);
-        if (result < 1 )
-            printf("error\n");
+        if (result < 1 ){
+            printf("error on write\n");
+            break;
+        }
         bytesWrite += result;
     }
 }
@@ -258,79 +193,71 @@ int parse_string(char pInputString[btf_sendline_n],char *Delimiter, char **pToke
 }
 
 //send
-int btf_send(char* btf_sendline){
+int btf_run(double *input, int input_len, double *output, int output_len){
   int sockfd;
-  int i,n,offset,len;
-  int ID;
+  int i,n;
   struct sockaddr_in servaddr,cliaddr;
-  char message[btf_sendline_n];
-  char btf_ip[15];
-  char hostname[128];
+  char message1[btf_sendline_n],message2[btf_sendline_n];
   unsigned int length = 0;
+
+  if (btf_model[0]=='\0'){
+    perror("BTF_MODEL not set");
+    return -1;
+  }
 
   btf_verbose=1;
 
   srand(time(NULL));
 
-  hostname_to_ip(btf_host, btf_ip);
-  gethostname(hostname, sizeof hostname);
-
   bzero(&servaddr,sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_addr.s_addr=inet_addr(btf_ip);
   servaddr.sin_port=htons(btf_port);
-
-  if (btf_model[0]=='\0'){
-    if (btf_verbose)
-        printf("DATA_NOT_SENT ---[%d]---> %s\n",n,message);
-    return 1;
-  }
-
-  printf("%s\n",message);
   sockfd=socket(AF_INET,SOCK_STREAM,0);
   if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) <0){
     perror("ERROR connecting");
     return -1;
   }
 
+  //compose request message
+  sprintf(message1,"%s::(1,%d)::[",btf_model,input_len);
+  for(i = 0; i < input_len-1; i++){
+    sprintf(message1,"%s%g,",message1,*(input+i));
+  }
+  sprintf(message1,"%s%g]",message1,*(input+input_len-1));
+
   //send request
-  memset(message, 0, btf_sendline_n);
-  sprintf(message,"%s%s",btf_model,btf_sendline);
-  memset(btf_sendline, 0, btf_sendline_n);
-  length=strlen(message);
-  WriteXBytes(sockfd, sizeof(length), (void*)(&length));
-  WriteXBytes(sockfd, length, (void*)message);
+  length=strlen(message1);
   if (btf_verbose)
-     printf("%s:%d ---[%d]---> %s\n",btf_ip,btf_port,n,message);
+     printf("%s:%d >------> %s\n",btf_ip,btf_port,message1);
+  WriteXBytes(sockfd, sizeof(length), (void*)(&length));
+  WriteXBytes(sockfd, length, (void*)message1);
 
   //receive answer
   length=0;
-  memset(message+sizeof(length), 0, btf_sendline_n);
+  memset(message1+sizeof(length), 0, btf_sendline_n);
   ReadXBytes(sockfd, sizeof(length), (void*)(&length));
-  ReadXBytes(sockfd, length, (void*)message);
+  ReadXBytes(sockfd, length, (void*)message1);
   if (btf_verbose)
-     printf("%s:%d ---[%d]---< %s\n",btf_ip,btf_port,n,message);
+     printf("%s:%d <------< %s\n",btf_ip,btf_port,message1);
 
-  //parse answer
-  parse_string(message,"::",pToken);
-  memset(btf_sendline, 0, btf_sendline_n);
-  snprintf(btf_sendline,strlen(pToken[3]),",%s",pToken[3]+1);
-  n=parse_string(btf_sendline,",",pToken);
-
+  //parse answer message
+  parse_string(message1,"::[",pToken);
+  memset(message2, 0, btf_sendline_n);
+  snprintf(message2,strlen(pToken[3]),",%s",pToken[3]+1);
+  n=parse_string(message2,",",pToken);
   for(i = 0; i<n; i++){
-    printf("%f\n",atof(pToken[i]));
+    output[i]=atof(pToken[i]);
   }
 
   close(sockfd);
   return 0;
 }
 
-int btf_send_(char* btf_sendline){
-  btf_send(btf_sendline);
-  return 0;
+int btf_run_(double *input, int input_len, double *output, int output_len){
+  return btf_run(input,input_len,output,output_len);
 }
 
-int btf_send__(char* btf_sendline){
-  btf_send(btf_sendline);
-  return 0;
+int btf_run__(double *input, int input_len, double *output, int output_len){
+  return btf_run(input,input_len,output,output_len);
 }
