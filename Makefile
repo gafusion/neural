@@ -23,17 +23,23 @@ else
 	ARCH=ar cr
 endif
 
-LLIB = libbrainfuse.a
+LLIB = libbrainfuse.a libbrainfusetf.a
 
-EXEC = brainfuse_run.exe
+EXEC = brainfuse_run.exe brainfuse_tf_run.exe
 
-OBJECTS = brainfuse_lib.o brainfuse_exe.o
+OBJECTS = brainfuse_tf_lib.o brainfuse_lib.o brainfuse_exe.o
 
-$(LLIB): brainfuse_lib.o Makefile eped1nn/toq_profiles.o
-	$(ARCH) $(LLIB) $<
+libbrainfuse.a: brainfuse_lib.o Makefile eped1nn/toq_profiles.o
+	$(ARCH) libbrainfuse.a $<
 
-$(EXEC) : brainfuse_run.c $(LLIB) 
+libbrainfusetf.a: brainfuse_tf_lib.o Makefile
+	$(ARCH) libbrainfuse.a $<
+
+brainfuse_run.exe : brainfuse_run.c libbrainfuse.a
 	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lfann -lm -L$(FANN_ROOT)/lib/ -I$(FANN_ROOT)/src/include -I$(FANN_ROOT)/include
+
+brainfuse_tf_run.exe : brainfuse_tf.c libbrainfusetf.a
+	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lm
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -I./ -I$(FANN_ROOT)/src/include -I$(FANN_ROOT)/include

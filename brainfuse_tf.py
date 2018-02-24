@@ -30,7 +30,7 @@ def send_info(sock, path, x_names, y_names):
 
 def send_msg(sock, msg):
     # Prefix each message with a 4-byte length (network byte order)
-    msg = struct.pack('>I', len(msg)) + msg
+    msg = struct.pack('=I', len(msg)) + msg
     sock.sendall(msg)
 
 def parse_data(data):
@@ -46,7 +46,7 @@ def recv_msg(sock):
     raw_msglen = recvall(sock, 4)
     if not raw_msglen:
         return None
-    msglen = struct.unpack('>I', raw_msglen)[0]
+    msglen = struct.unpack('=I', raw_msglen)[0]
     # Read the message data
     return recvall(sock, msglen)
 
@@ -133,9 +133,10 @@ if __name__ == "__main__":
 
         def handle(self):
             msg=recv_msg(self.request)
-            print("{}: {}".format(self.client_address[0],msg))
             if msg is None:
+                print("{}: {}".format(self.client_address[0],'-- no message --'))
                 return
+            print("{}: {}".format(self.client_address[0],msg))
             query=msg.split('::')[1]
             #respond to info request
             if query=='(?,?)':

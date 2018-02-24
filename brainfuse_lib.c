@@ -21,7 +21,6 @@ fann_type ****nrm_table;
 //=============
 // LOADING ANNS
 //=============
-
 int load_anns(int global_nn_model, char *directory, char *basename){
   DIR *dir;
   int n,k,j;
