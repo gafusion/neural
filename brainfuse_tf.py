@@ -156,7 +156,7 @@ if __name__ == "__main__":
                         send_data(self.request,path,output)
                         msg=recv_msg(self.request)
                     except Exception as _excp:
-                        if 'Broken pipe' in repr(_excp):
+                        if 'Broken pipe' in repr(_excp) or 'Connection reset by peer' in repr(_excp):
                             print('DATA-MODE: serve ends')
                             break
                         else:

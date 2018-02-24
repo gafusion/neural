@@ -9,6 +9,7 @@
 #include<netdb.h>
 #include<arpa/inet.h>
 char btf_model[256];
+char *pToken[100];
 char btf_host[100];
 int  btf_port=8882;
 int  btf_verbose=0;
@@ -20,8 +21,8 @@ int hostname_to_ip(char * hostname , char* ip){
     struct in_addr **addr_list;
     int i;
 
-    strcpy(ip , "127.0.0.1" );
-    return 0;
+    //strcpy(ip , "127.0.0.1" );
+    //return 0;
 
     if ( (he = gethostbyname( hostname ) ) == NULL){
         // get the host info
@@ -183,10 +184,12 @@ int init_btf(char *model, char *btf_sendline, int n){
   else
     set_btf_verbose(0);
 
-  if (getenv("BTF_HOST")!=NULL)
+  if (getenv("BTF_HOST")!=NULL){
     set_btf_host(getenv("BTF_HOST"));
-  else
-    set_btf_host("gadb-harvest.ddns.net");
+  }else{
+    set_btf_host("localhost");
+    //set_btf_host("gadb-harvest.ddns.net");
+  }
 
   if (getenv("BTF_PORT")!=NULL){
     set_btf_port(atoi(getenv("BTF_PORT")));
@@ -222,21 +225,36 @@ int init_btf__(char *model, char *btf_sendline, int *n){
 
 // This assumes buffer is at least x bytes long,
 // and that the socket is blocking.
-void ReadXBytes(int socket, unsigned int x, void* buffer)
-{
+void ReadXBytes(int socket, unsigned int x, void* buffer){
     int bytesRead = 0;
     int result;
-    printf("%d\n",x);
-    while (bytesRead < x)
-    {
+    while (bytesRead < x){
         result = read(socket, buffer + bytesRead, x - bytesRead);
         if (result < 1 )
-        {
             printf("error\n");
-        }
-
         bytesRead += result;
     }
+}
+
+void WriteXBytes(int socket, unsigned int x, void* buffer){
+    int bytesWrite = 0;
+    int result;
+    while (bytesWrite < x) {
+        result = write(socket, buffer + bytesWrite, x - bytesWrite);
+        if (result < 1 )
+            printf("error\n");
+        bytesWrite += result;
+    }
+}
+
+int parse_string(char pInputString[btf_sendline_n],char *Delimiter, char **pToken){
+  int i=0;
+  pToken[i] = strtok(pInputString, Delimiter);
+  i++;
+  while ((pToken[i] = strtok(NULL, Delimiter)) != NULL){
+     i++;
+  }
+  return i;
 }
 
 //send
@@ -250,22 +268,17 @@ int btf_send(char* btf_sendline){
   char hostname[128];
   unsigned int length = 0;
 
+  btf_verbose=1;
+
   srand(time(NULL));
 
   hostname_to_ip(btf_host, btf_ip);
   gethostname(hostname, sizeof hostname);
 
-  printf("%s\n",btf_ip);
-
   bzero(&servaddr,sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_addr.s_addr=inet_addr(btf_ip);
   servaddr.sin_port=htons(btf_port);
-
-  memset(message, 0, btf_sendline_n);
-  sprintf(message,"%s%s",btf_model,btf_sendline);
-  memset(btf_sendline, 0, btf_sendline_n);
-  printf("%s\n",message);
 
   if (btf_model[0]=='\0'){
     if (btf_verbose)
@@ -279,25 +292,36 @@ int btf_send(char* btf_sendline){
     perror("ERROR connecting");
     return -1;
   }
-  length=strlen(message);
-  printf("%d\n%lu\n",length,sizeof(length));
-  write(sockfd, &length, 4);
-  write(sockfd, message, strlen(message));
 
-  // we assume that sizeof(length) will return 4 here.
+  //send request
   memset(message, 0, btf_sendline_n);
+  sprintf(message,"%s%s",btf_model,btf_sendline);
+  memset(btf_sendline, 0, btf_sendline_n);
+  length=strlen(message);
+  WriteXBytes(sockfd, sizeof(length), (void*)(&length));
+  WriteXBytes(sockfd, length, (void*)message);
+  if (btf_verbose)
+     printf("%s:%d ---[%d]---> %s\n",btf_ip,btf_port,n,message);
+
+  //receive answer
+  length=0;
+  memset(message+sizeof(length), 0, btf_sendline_n);
   ReadXBytes(sockfd, sizeof(length), (void*)(&length));
-  printf("%d\n",length);
   ReadXBytes(sockfd, length, (void*)message);
-  printf("%s\n",message);
+  if (btf_verbose)
+     printf("%s:%d ---[%d]---< %s\n",btf_ip,btf_port,n,message);
+
+  //parse answer
+  parse_string(message,"::",pToken);
+  memset(btf_sendline, 0, btf_sendline_n);
+  snprintf(btf_sendline,strlen(pToken[3]),",%s",pToken[3]+1);
+  n=parse_string(btf_sendline,",",pToken);
+
+  for(i = 0; i<n; i++){
+    printf("%f\n",atof(pToken[i]));
+  }
 
   close(sockfd);
-  
-//  if (btf_verbose){
-//    printf("%s:%d ---[%d]---> %s\n",btf_ip,btf_port,n,message);
-//    //printf("===btf ends=== (%3.3f ms)\n",(double)(btf_toc - btf_tic) / CLOCKS_PER_SEC * 1E3);
-//  }
-
   return 0;
 }
 
