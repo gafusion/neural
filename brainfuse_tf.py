@@ -7,7 +7,7 @@ import numpy as np
 from numpy import *
 import struct
 
-serve_port=8883
+serve_port=8882
 
 #=======================
 # helper functions
@@ -19,7 +19,7 @@ def send_data(sock, path, data):
     return send_msg(sock, payload)
 
 def send_ask_info(sock, path):
-    payload='{path}'.format(path=path)
+    payload='{path}::(?,?)'.format(path=path)
     return send_msg(sock, payload)
 
 def send_info(sock, path, x_names, y_names):
@@ -33,16 +33,11 @@ def send_msg(sock, msg):
     msg = struct.pack('>I', len(msg)) + msg
     sock.sendall(msg)
 
-def recv_data(sock):
-    data=recv_msg(sock)
+def parse_data(data):
     path,shape,data=data.split('::')
     return path, np.reshape(eval(data),eval(shape))
 
-def recv_ask_info(sock):
-    return recv_msg(sock)
-
-def recv_info(sock):
-    data=recv_msg(sock)
+def parse_info(data):
     path,x_names,y_names=data.split('::')
     return path, eval(x_names), eval(y_names)
 
@@ -83,15 +78,23 @@ class btf_connect(object):
     def __exit__(self, exec_type, exec_value, exec_tb):
         self.sock.close()
 
-    def run(self, input):
+    def info(self):
         send_ask_info(self.sock, self.path)
-        path,self.x_names,self.y_names=recv_info(self.sock)
-        input=np.array([input[name][:10] for name in self.x_names]).T
-        #print input.shape
+        path,self.x_names,self.y_names=parse_info(recv_msg(self.sock))
+        return self.x_names,self.y_names
+
+    def run(self, input):
+        if isinstance(input,dict):
+            if not hasattr(self,'x_names') or not hasattr(self,'y_names'):
+                with btf_connect(host=self.host,port=self.port,path=self.path) as btf:
+                    self.x_names,self.y_names=btf.info()
+            print(self.x_names)
+            print(self.y_names)
+            input=np.array([input[name] for name in self.x_names]).T
         send_data(self.sock, self.path, input)
-        path,output=recv_data(self.sock)
-        #print output.shape
-        output={name:output[:,k] for k,name in enumerate(self.y_names)}
+        path,output=parse_data(recv_msg(self.sock))
+        if isinstance(input,dict):
+            output={name:output[:,k] for k,name in enumerate(self.y_names)}
         return output
 
 #=======================
@@ -115,7 +118,7 @@ if __name__ == "__main__":
             self.y_names=self.y_names.eval()
 
         def activate(self,input):
-            return self.run(self.y, feed_dict={'x:0': input,'keep_prob:0':1.0})
+            return self.run(self.y, feed_dict={'x:0': input})
 
     models={}
     def activate(path, input):
@@ -129,15 +132,34 @@ if __name__ == "__main__":
     class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
         def handle(self):
-            print("{} wrote:".format(self.client_address[0]))
-            path=recv_ask_info(self.request)
-            x_names,y_names=activate(path=path,input=None)
-            #print x_names
-            send_info(self.request,path,x_names,y_names)
-            #print x_names
-            path,input=recv_data(self.request)
-            output=activate(path=path,input=input)
-            send_data(self.request,path,output)
+            msg=recv_msg(self.request)
+            print("{}: {}".format(self.client_address[0],msg))
+            if msg is None:
+                return
+            query=msg.split('::')[1]
+            #respond to info request
+            if query=='(?,?)':
+                print('INFO-MODE')
+                path=msg.split('::')[0]
+                x_names,y_names=activate(path=path,input=None)
+                send_info(self.request,path,x_names,y_names)
+            #respond to data request
+            else:
+                print('DATA-MODE: serve starts')
+                while True:
+                    try:
+                        if msg is not None:
+                            path,input=parse_data(msg)
+                            print input
+                            output=activate(path=path,input=input)
+                        send_data(self.request,path,output)
+                        msg=recv_msg(self.request)
+                    except Exception as _excp:
+                        if 'Broken pipe' in repr(_excp):
+                            print('DATA-MODE: serve ends')
+                            break
+                        else:
+                            raise
 
     class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
         pass
