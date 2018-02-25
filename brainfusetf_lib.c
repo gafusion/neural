@@ -13,6 +13,7 @@ char btf_host[100];
 char btf_ip[15];
 int  btf_port=8883;
 int  btf_verbose=0;
+int  btf_initialized=0;
 int  btf_sendline_n=65507;
 
 //Get ip from domain name
@@ -92,36 +93,6 @@ int set_btf_port__(int *port){
   return 0;
 }
 
-//init
-int btf_init(){
-  if (getenv("BTF_VERBOSE")!=NULL)
-    set_btf_verbose(atoi(getenv("BTF_VERBOSE")));
-
-  if (getenv("BTF_HOST")!=NULL){
-    set_btf_host(getenv("BTF_HOST"));
-  }else{
-    set_btf_host("localhost");
-    //set_btf_host("gadb-harvest.ddns.net");
-  }
-  btf_hostname_to_ip(btf_host, btf_ip);
-
-  if (getenv("BTF_PORT")!=NULL){
-    set_btf_port(atoi(getenv("BTF_PORT")));
-  }
-
-  return 0;
-}
-
-int btf_init_(){
-  btf_init();
-  return 0;
-}
-
-int btf_init__(){
-  btf_init();
-  return 0;
-}
-
 // This assumes buffer is at least x bytes long,
 // and that the socket is blocking.
 int ReadXBytes(int socket, unsigned int x, void* buffer){
@@ -176,6 +147,25 @@ int btf_run(char *model, double *input, int input_len, double *output, int outpu
     return -1;
   }
 
+  if (btf_initialized!=1){
+      if (getenv("BTF_VERBOSE")!=NULL)
+        set_btf_verbose(atoi(getenv("BTF_VERBOSE")));
+
+      if (getenv("BTF_HOST")!=NULL){
+        set_btf_host(getenv("BTF_HOST"));
+      }else{
+        set_btf_host("localhost");
+        //set_btf_host("gadb-harvest.ddns.net");
+      }
+      btf_hostname_to_ip(btf_host, btf_ip);
+
+      if (getenv("BTF_PORT")!=NULL){
+        set_btf_port(atoi(getenv("BTF_PORT")));
+      }
+
+      btf_initialized=1;
+  }
+
   srand(time(NULL));
 
   bzero(&servaddr,sizeof(servaddr));
@@ -196,9 +186,9 @@ int btf_run(char *model, double *input, int input_len, double *output, int outpu
   sprintf(message1,"%s%g]",message1,*(input+input_len-1));
 
   //send request
-  ack=-1;
   for(i = 0; i < 10; i++){
       ack=0;
+
       length=strlen(message1);
       if (btf_verbose)
          printf("%s:%d >>>>>>> %s\n",btf_ip,btf_port,message1);
@@ -212,6 +202,9 @@ int btf_run(char *model, double *input, int input_len, double *output, int outpu
       ack+=ReadXBytes(sockfd, length, (void*)message1);
       if (btf_verbose)
          printf("%s:%d <<<<<<< %s\n",btf_ip,btf_port,message1);
+
+      if (ack==0)
+        break;
   }
 
   //parse answer message
