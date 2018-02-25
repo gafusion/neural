@@ -7,23 +7,23 @@ import numpy as np
 from numpy import *
 import struct
 
-serve_port=8882
+serve_port=8883
 
 #=======================
 # helper functions
 #=======================
 def send_data(sock, path, data):
-    payload='{path}::{shape}::[{data}]'.format(path=path,
+    payload='{path}&{shape}&[{data}]'.format(path=path,
                                                 shape=data.shape,
                                                 data=','.join(map(lambda x:'%f'%x,data.flatten())))
     return send_msg(sock, payload)
 
 def send_ask_info(sock, path):
-    payload='{path}::(?,?)'.format(path=path)
+    payload='{path}&(?,?)'.format(path=path)
     return send_msg(sock, payload)
 
 def send_info(sock, path, x_names, y_names):
-    payload='{path}::{x_names}::{y_names}'.format(path=path,
+    payload='{path}&{x_names}&{y_names}'.format(path=path,
                                                   x_names=repr(map(str,x_names)),
                                                   y_names=repr(map(str,y_names)))
     return send_msg(sock, payload)
@@ -35,14 +35,14 @@ def send_msg(sock, msg):
 
 def parse_data(data):
     try:
-        path,shape,data=data.split('::')
+        path,shape,data=data.split('&')
     except Exception:
         print(data)
         raise
     return path, np.reshape(eval(data),eval(shape))
 
 def parse_info(data):
-    path,x_names,y_names=data.split('::')
+    path,x_names,y_names=data.split('&')
     return path, eval(x_names), eval(y_names)
 
 def recv_msg(sock):
@@ -141,11 +141,11 @@ if __name__ == "__main__":
                 print("{}: {}".format(self.client_address[0],'-- no message --'))
                 return
             print("{}: {}".format(self.client_address[0],msg))
-            query=msg.split('::')[1]
+            query=msg.split('&')[1]
             #respond to info request
             if query=='(?,?)':
                 print('INFO-MODE')
-                path=msg.split('::')[0]
+                path=msg.split('&')[0]
                 x_names,y_names=activate(path=path,input=None)
                 send_info(self.request,path,x_names,y_names)
             #respond to data request

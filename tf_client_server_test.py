@@ -1,5 +1,5 @@
 import numpy as np
-from brainfuse_tf import btf_connect
+from brainfusetf import btf_connect
 import time
 
 model='/tmp/meneghini/OMFIT/OMFIT_2018-02-21_10_23_05_903282/project/objects/dir_2018-02-23__16:51/16__788939/nn_SAT1_mb_128_abs_split_30x4/saved_model.pb'
