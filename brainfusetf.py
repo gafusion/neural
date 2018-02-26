@@ -68,7 +68,7 @@ def recvall(sock, n):
 # client
 #=======================
 class btf_connect(object):
-    def __init__(self, host='localhost', port=serve_port, path=None):
+    def __init__(self, path, host=os.environ.get('BTF_HOST','localhost'), port=os.environ.get('BTF_PORT',serve_port)):
         self.host = host
         self.port = port
         self.path = path
