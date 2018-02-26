@@ -205,6 +205,7 @@ int btf_run(char *model, double *input, int input_len, double *output, int outpu
 
       if (ack==0)
         break;
+      usleep(10*i);
   }
 
   //parse answer message
