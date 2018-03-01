@@ -101,6 +101,32 @@ class btf_connect(object):
             output={name:output[:,k] for k,name in enumerate(self.y_names)}
         return output
 
+def activateNets(nets, dB):
+    '''
+    :param nets: dictionary with OMFITbrainfuse objects (or path where to load NNs from)
+
+    :param dB: dictionary with entries to run on
+
+    :return: tuple with (out,sut,targets,nets,out_)
+    '''
+    if isinstance(nets,basestring):
+        nets={k:OMFITpath(file) for k,file in enumerate(glob.glob(nets))}
+    elif not isinstance(nets,(list,tuple)):
+        nets={0:nets}
+    net=nets.values()[0]
+
+    with btf_connect(path=net.filename) as btf:
+        inputNames,outputNames=btf.info()
+    targets=array([dB[k] for k in outputNames]).T
+
+    out_=empty((len(atleast_1d(dB.values()[0])),len(outputNames),len(nets)))
+    for k,n in enumerate(nets):
+        with btf_connect(path=net.filename) as btf:
+            out_[:,:,k]=btf.run(dB)
+    out=mean(out_,-1)
+    sut=std(out_,-1)
+    return out,sut,targets,nets,out_
+
 #=======================
 # server
 #=======================
@@ -140,7 +166,7 @@ if __name__ == "__main__":
             if msg is None:
                 print("{}: {}".format(self.client_address[0],'-- no message --'))
                 return
-            print("{}: {}".format(self.client_address[0],msg))
+            print("{}: message length {}".format(self.client_address[0],len(msg)))
             query=msg.split('&')[1]
             #respond to info request
             if query=='(?,?)':
@@ -155,7 +181,7 @@ if __name__ == "__main__":
                     try:
                         if msg is not None:
                             path,input=parse_data(msg)
-                            print input
+                            print path
                             output=activate(path=path,input=input)
                         send_data(self.request,path,output)
                         msg=recv_msg(self.request)
