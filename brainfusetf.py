@@ -8,7 +8,7 @@ import numpy as np
 from numpy import *
 import struct
 
-default_serve_port=8883
+default_serve_port=8887
 
 #=======================
 # helper functions
@@ -139,13 +139,40 @@ if __name__ == "__main__":
     if len(sys.argv)>1:
         serve_port=int(sys.argv[1])
 
+    models={}
+    def activate(path, input):
+        '''
+        high level function that handles models buffering
+        :param path: path of the model
+        :param input: input array (or None to get xnames,ynames)
+        :return: output array or xnames,ynames
+        '''
+        if not path.startswith(os.sep):
+            path=os.path.split(__file__)[0]+os.sep+path
+        if path not in models:
+            models[path]=model(path=path)
+        elif os.path.getmtime(path)>models[path].load_time:
+            models[path].close()
+            models[path]=model(path=path)
+        if input is None:
+            return models[path].x_names,models[path].y_names
+        else:
+            return models[path].activate(input)
+
     class model(tf.Session):
         def __init__(self, target='', graph=None, config=None, path=None):
             tf.Session.__init__(self, target=target, graph=graph, config=config)
             self.__enter__()
-            with gfile.FastGFile(path, 'rb') as f:
+
+            if not path.startswith(os.sep):
+                path=os.path.split(__file__)[0]+os.sep+path
+            self.path=path
+            print('Loading %s'%self.path)
+            self.load_time=os.path.getmtime(self.path)
+            with gfile.FastGFile(self.path, 'rb') as f:
                 graph_def = tf.GraphDef()
                 graph_def.ParseFromString(f.read())
+
             self.y, self.x_names, self.y_names = tf.import_graph_def(graph_def, return_elements=['unnormalized_nn/y:0',
                                                                                                  'x_names:0',
                                                                                                  'y_names:0'], name='')
@@ -153,16 +180,12 @@ if __name__ == "__main__":
             self.y_names=self.y_names.eval()
 
         def activate(self,input):
+            '''
+            :param input: input array
+            :return: output array
+            '''
+            print('Serving %s'%self.path)
             return self.run(self.y, feed_dict={'x:0': input})
-
-    models={}
-    def activate(path, input):
-        if path not in models:
-            models[path]=model(path=path)
-        if input is None:
-            return models[path].x_names,models[path].y_names
-        else:
-            return models[path].activate(input)
 
     class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
 
@@ -186,7 +209,6 @@ if __name__ == "__main__":
                     try:
                         if msg is not None:
                             path,input=parse_data(msg)
-                            print path
                             output=activate(path=path,input=input)
                         send_data(self.request,path,output)
                         msg=recv_msg(self.request)

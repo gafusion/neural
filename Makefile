@@ -27,7 +27,7 @@ LLIB = libbrainfuse.a libbrainfusetf.a
 
 EXEC = brainfuse_run.exe brainfusetf_run.exe
 
-OBJECTS = brainfusetf_lib.o brainfuse_lib.o brainfuse_exe.o
+OBJECTS = brainfusetf_lib.o brainfuse_lib.o brainfuse_exe.o brainfusetf_exe.o
 
 libs: libbrainfuse.a libbrainfusetf.a
 
