@@ -3,11 +3,12 @@ import socket
 import threading
 import time
 import os
+import sys
 import numpy as np
 from numpy import *
 import struct
 
-serve_port=8883
+default_serve_port=8883
 
 #=======================
 # helper functions
@@ -68,7 +69,7 @@ def recvall(sock, n):
 # client
 #=======================
 class btf_connect(object):
-    def __init__(self, path, host=os.environ.get('BTF_HOST','localhost'), port=os.environ.get('BTF_PORT',serve_port)):
+    def __init__(self, path, host=os.environ.get('BTF_HOST','localhost'), port=os.environ.get('BTF_PORT',default_serve_port)):
         self.host = host
         self.port = port
         self.path = path
@@ -133,6 +134,10 @@ def activateNets(nets, dB):
 if __name__ == "__main__":
     import tensorflow as tf
     from tensorflow.python.platform import gfile
+
+    serve_port=default_serve_port
+    if len(sys.argv)>1:
+        serve_port=int(sys.argv[1])
 
     class model(tf.Session):
         def __init__(self, target='', graph=None, config=None, path=None):
