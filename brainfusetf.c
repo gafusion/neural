@@ -3,8 +3,6 @@
 
 int main(int argc, char**argv){
 
-  set_btf_verbose(1);
-
   int i;
   char btf_sendline[65507];
   char model[256]="tglfnn/models/nn_SAT1_mb_1024_abs_reg_common_stair2x2x6.pb";
