@@ -8,7 +8,7 @@ import numpy as np
 from numpy import *
 import struct
 
-default_serve_port=8887
+default_serve_port=8883
 
 #=======================
 # helper functions
