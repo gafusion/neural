@@ -223,8 +223,12 @@ if __name__ == "__main__":
         pass
 
     server = ThreadedTCPServer(('0.0.0.0', serve_port), ThreadedTCPRequestHandler)
-    print("Serving on port %d"%serve_port)
-
+    print('-- BASH shell --')
+    print("export BTF_HOST=%s"%socket.gethostname())
+    print("export BTF_PORT=%d"%serve_port)
+    print('-- TCSH shell --')
+    print("setenv BTF_HOST %s"%socket.gethostname())
+    print("setenv BTF_PORT %d"%serve_port)
     try:
         server.serve_forever()
     except (KeyboardInterrupt, SystemExit):
