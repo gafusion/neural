@@ -73,7 +73,7 @@ class btf_connect(object):
         if host is None:
             host=os.environ.get('BTF_HOST','localhost')
         if port is None:
-            port=os.environ.get('BTF_PORT',default_serve_port)
+            port=int(os.environ.get('BTF_PORT',default_serve_port))
         self.host = host
         self.port = port
         self.path = path
@@ -141,6 +141,8 @@ def activateNets(nets, dB):
 if __name__ == "__main__":
     import tensorflow as tf
     from tensorflow.python.platform import gfile
+
+    __file__=os.path.abspath(__file__)
 
     serve_port=default_serve_port
     if len(sys.argv)>1:
