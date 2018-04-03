@@ -8,6 +8,8 @@ input = np.atleast_2d(
 
 t0=time.time()
 with btf_connect(path=model) as tf:
+    print tf.info()
+with btf_connect(path=model) as tf:
     print tf.run(input=input)
     print tf.run(input=input*2)
     time.sleep(1)
