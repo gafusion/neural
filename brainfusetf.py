@@ -158,11 +158,18 @@ if __name__ == "__main__":
         '''
         if not path.startswith(os.sep):
             path=os.path.split(__file__)[0]+os.sep+path
+        path=os.path.realpath(path)
         if path not in models:
+            print('Loading %s'%path)
             models[path]=model(path=path)
-        elif os.path.getmtime(path)>models[path].load_time:
-            models[path].close()
-            models[path]=model(path=path)
+        else:
+            print('mtime %f'%os.path.getmtime(path))
+            print('ltime %f'%models[path].load_time)
+            if os.path.getmtime(path)>models[path].load_time:
+                raise(Exception('Model reload functionality not implemented')) #somehow the model does not get updated?
+                #print('Updating %s'%path)
+                #models[path].close()
+                #models[path]=model(path=path)
         if input is None:
             return models[path].x_names,models[path].y_names
         else:
@@ -172,11 +179,10 @@ if __name__ == "__main__":
         def __init__(self, target='', graph=None, config=None, path=None):
             tf.Session.__init__(self, target=target, graph=graph, config=config)
             self.__enter__()
-
             if not path.startswith(os.sep):
                 path=os.path.split(__file__)[0]+os.sep+path
+            path=os.path.realpath(path)
             self.path=path
-            print('Loading %s'%self.path)
             self.load_time=os.path.getmtime(self.path)
             with gfile.FastGFile(self.path, 'rb') as f:
                 graph_def = tf.GraphDef()
