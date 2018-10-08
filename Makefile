@@ -23,19 +23,25 @@ else
 	ARCH=ar cr
 endif
 
-LLIB = libbrainfusetf.a
+LLIB = libbrainfusetf.a libbrainfuse.a
 
-EXEC = brainfusetf_run.exe
+EXEC = brainfusetf_run.exe brainfuse_run.exe
 
 OBJECTS = brainfusetf_lib.o brainfusetf_exe.o
 
-libs: libbrainfusetf.a
+libs: libbrainfusetf.a libbrainfuse.a
 
 libbrainfusetf.a: brainfusetf_lib.o Makefile
 	$(ARCH) libbrainfusetf.a $<
 
 brainfusetf_run.exe : brainfusetf.c libbrainfusetf.a
 	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfusetf -lm
+
+libbrainfuse.a: brainfuse_lib.o Makefile
+	$(ARCH) libbrainfuse.a $<
+
+brainfuse_run.exe : brainfuse_run.c libbrainfuse.a
+	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lm
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -I./
