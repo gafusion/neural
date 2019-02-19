@@ -92,8 +92,11 @@ class btf_connect(object):
 
     def info(self):
         send_ask_info(self.sock, self.path)
-        path,self.x_names,self.y_names=parse_info(recv_msg(self.sock))
-        return self.x_names,self.y_names
+        data = recv_msg(self.sock)
+        if data is None:
+            raise ValueError('Error receiving infos for model: %s' % self.path)
+        path, self.x_names, self.y_names = parse_info(data)
+        return self.x_names, self.y_names
 
     def run(self, input):
         if isinstance(input,dict):
