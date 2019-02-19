@@ -99,8 +99,7 @@ int btf_run(char *model, double *input, int input_len, double *output, int outpu
       if (getenv("BTF_HOST")!=NULL){
         sprintf(btf_host,"%s",getenv("BTF_HOST"));
       }else{
-        sprintf(btf_host,"localhost");
-        //sprintf(btf_host,"gadb-harvest.ddns.net");
+        sprintf(btf_host,"gadb-harvest.ddns.net");
       }
       btf_hostname_to_ip(btf_host, btf_ip);
 
