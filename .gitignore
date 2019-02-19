@@ -17,6 +17,7 @@ epednn.profiles
 *.mod
 toq_profiles_test
 *.dSYM
+.DS_Store
 
 online_slice/*/main.py
 online_slice/*/model.py
