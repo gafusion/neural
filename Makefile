@@ -41,10 +41,10 @@ libbrainfuse.a: brainfuse_lib.o Makefile
 	$(ARCH) libbrainfuse.a $<
 
 brainfuse_run.exe : brainfuse_run.c libbrainfuse.a
-	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lm
+	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lm -L$(FANN_ROOT)/lib/ -I$(FANN_ROOT)/src/include -I$(FANN_ROOT)/include
 
 %.o : %.c
-	$(CC) $(CFLAGS) -c $< -I./
+	$(CC) $(CFLAGS) -c $< -I./ -I$(FANN_ROOT)/src/include -I$(FANN_ROOT)/include
 
 all: $(LLIB) $(EXEC) toq_profiles_test
 
