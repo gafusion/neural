@@ -129,7 +129,6 @@ int btf_run(char *model, double *input, int input_len, double *output, int outpu
     sprintf(message1,"%s%g,",message1,*(input+i));
   }
   sprintf(message1,"%s%g]",message1,*(input+input_len-1));
-
   //send request
   for(i = 0; i < 10; i++){
       ack=0;
