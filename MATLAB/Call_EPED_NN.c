@@ -231,7 +231,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     dimy = (int)dims[0]; dimx = (int)dims[1];
     
     //associate outputs
-    c_out_m = plhs[0] = mxCreateDoubleMatrix(dimy,dimx,mxREAL);
+    c_out_m = plhs[0] = mxCreateDoubleMatrix(dimy,18,mxREAL);
     
     //associate pointers
     input = mxGetPr(a_in_m);
