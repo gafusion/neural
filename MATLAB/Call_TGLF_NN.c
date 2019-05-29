@@ -231,7 +231,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     dimy = (int)dims[0]; dimx = (int)dims[1];
     
     //associate outputs
-    c_out_m = plhs[0] = mxCreateDoubleMatrix(dimy,18,mxREAL);
+    c_out_m = plhs[0] = mxCreateDoubleMatrix(dimy,6,mxREAL);
     
     //associate pointers
     input = mxGetPr(a_in_m);
@@ -239,13 +239,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     // declare other variables
     char btf_sendline[65507];
-    char model[256]="eped1nn/models/EPED_mb_128_pow_norm_common_30x10.pb";
+    char model[256]="tglfnn/models/2IONS.pb";
     
     //printf("Length of inputs: %d\n", dimx);
     
     
     //do something
-    btf_run(model, input, dimx, output, 18);
+    btf_run(model, input, dimx, output, 6);
     
     /*const mwSize *odims;
      odims = mxGetDimensions(plhs[0]);
