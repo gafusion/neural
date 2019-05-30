@@ -29,16 +29,22 @@ EXEC = brainfusetf_run.exe brainfuse_run.exe
 
 OBJECTS = brainfusetf_lib.o brainfusetf_exe.o
 
-libs: libbrainfusetf.a libbrainfuse.a
+libs: libbrainfusetf.a libbrainfuse.a libbrainfusetf.so libbrainfuse.so
 
 libbrainfusetf.a: brainfusetf_lib.o Makefile
 	$(ARCH) libbrainfusetf.a $<
+
+libbrainfusetf.so: brainfusetf_lib.o Makefile
+	$(CC) $(CFLAGS) -shared -o $@ -I./ -L./ $< -lbrainfusetf -lm
 
 brainfusetf_run.exe : brainfusetf.c libbrainfusetf.a
 	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfusetf -lm
 
 libbrainfuse.a: brainfuse_lib.o Makefile
 	$(ARCH) libbrainfuse.a $<
+
+libbrainfuse.so: brainfuse_lib.o Makefile
+	$(CC) $(CFLAGS) -shared -o $@ -I./ -L./ $< -lbrainfuse -lm -L$(FANN_ROOT)/lib/ -I$(FANN_ROOT)/src/include -I$(FANN_ROOT)/include -lfann
 
 brainfuse_run.exe : brainfuse_run.c libbrainfuse.a
 	$(CC) $(CFLAGS) -o $@ -I./ -L./ $< -lbrainfuse -lm -L$(FANN_ROOT)/lib/ -I$(FANN_ROOT)/src/include -I$(FANN_ROOT)/include -lfann
