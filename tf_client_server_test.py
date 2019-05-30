@@ -41,3 +41,4 @@ with btf_connect(path=model) as tf:
     output = tf.run(input=input)
 
 print_nice(model, input_names, input, output_names, output)
+
