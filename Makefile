@@ -29,7 +29,9 @@ EXEC = brainfusetf_run.exe brainfuse_run.exe
 
 OBJECTS = brainfusetf_lib.o brainfusetf_exe.o
 
-libs: libbrainfusetf.a libbrainfuse.a libbrainfusetf.so libbrainfuse.so
+libs: libbrainfusetf.a libbrainfuse.a
+
+dyn: libbrainfusetf.so libbrainfuse.so
 
 libbrainfusetf.a: brainfusetf_lib.o Makefile
 	$(ARCH) libbrainfusetf.a $<
