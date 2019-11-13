@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 import numpy
 from numpy import *
 import os
@@ -143,8 +146,8 @@ class brainfuse(libfann.neural_net):
         return self
 
 def activateNets(nets, dB):
-    net=nets[nets.keys()[0]]
-    out_=empty((len(dB[dB.keys()[0]]),len(net.outputNames),len(nets)))
+    net=list(nets.values())[0]
+    out_=empty((len(dB[list(dB.keys())[0]]),len(net.outputNames),len(nets)))
     for k,n in enumerate(nets):
         out_[:,:,k],targets=nets[n].activate(dB)
     out=mean(out_,-1)
@@ -152,7 +155,7 @@ def activateNets(nets, dB):
     return out,sut,targets,nets,out_
 
 def activateNetsFile(nets, inputFile, targetFile=None):
-    net=nets[nets.keys()[0]]
+    net=list(nets.values())[0]
     dB={}
     for k in net.inputNames:
         dB[k]=[]
@@ -171,8 +174,8 @@ def activateNetsFile(nets, inputFile, targetFile=None):
     return activateNets(nets,dB)
 
 def activateMergeNets(nets, dB, merge_nets):
-        net=nets[nets.keys()[0]]
-        out_0=empty((len(dB[dB.keys()[0]]),len(net.outputNames),len(nets)))
+        net=list(nets.values())[0]
+        out_0=empty((len(dB[list(dB.keys())[0]]),len(net.outputNames),len(nets)))
         index=net.inputNames.index(merge_nets)
         centers=empty(len(nets))
         merge_norm=empty(len(nets))

@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 import sys, glob, re, os
 os.environ.setdefault('NEURAL', '/Users/meneghini/Coding/neural')
 sys.path.insert(0, os.environ['NEURAL'])
@@ -17,7 +20,7 @@ colorblind_line_cycle = ['#377eb8', '#ff7f00', '#4daf4a', '#f781bf', '#a65628', 
                          '#dede00'] * 20
 
 # load model details
-execfile('./model.py') in locals(), globals()
+exec(compile(open('./model.py', "rb").read(), './model.py', 'exec')) in locals(), globals()
 
 def mapper_function(x):
     return re.sub('^OUT_','',mapper.get(x,x))
@@ -36,7 +39,7 @@ for k, s in enumerate(inputNames):
     cases['average'][s]=scale_mean_in[k]
 
 # Set up inputs
-cases_dropdown = Dropdown(label="Cases", menu=[(case,case) for case in cases.keys()])
+cases_dropdown = Dropdown(label="Cases", menu=[(case,case) for case in cases])
 
 n = 5.
 slider = {}
@@ -45,7 +48,7 @@ for k, s in enumerate(inputNames):
         positive_inputs_value = (scale_mean_in[k] + n * scale_deviation_in[k])/100.
     else:
         positive_inputs_value = numpy.nan
-    slider[s] = dict(value=cases.values()[0].get(s,scale_mean_in[k]),
+    slider[s] = dict(value=list(cases.values())[0].get(s,scale_mean_in[k]),
                      start=numpy.nanmax([positive_inputs_value, scale_mean_in[k] - n * scale_deviation_in[k]]),
                      end=scale_mean_in[k] + n * scale_deviation_in[k], step=scale_deviation_in[k] / 100.)
     slider[s]['slider'] = Slider(title=mapper_function(s), **slider[s])
@@ -181,12 +184,12 @@ cases_dropdown.on_change('value', lambda attrname, old, new, nets=nets, svar='__
 
 # Set up layouts and add to document
 if len(cases)>1:
-    controls = widgetbox(*([cases_dropdown]+[slider[s]['slider'] for s in sorted(slider.keys(),key=lambda x:mapper_function(x).lower())]))
+    controls = widgetbox(*([cases_dropdown]+[slider[s]['slider'] for s in sorted(list(slider.keys()),key=lambda x:mapper_function(x).lower())]))
 else:
-    controls = widgetbox(*[slider[s]['slider'] for s in sorted(slider.keys(),key=lambda x:mapper_function(x).lower())])
+    controls = widgetbox(*[slider[s]['slider'] for s in sorted(list(slider.keys()),key=lambda x:mapper_function(x).lower())])
 curdoc().add_root(out_buttons)
 curdoc().add_root(row(controls, column(plot, hold_button)))
 curdoc().title = title
 
 # refresh before starting
-update_data(None, None, None, nets, slider.keys()[0])
+update_data(None, None, None, nets, list(slider.keys())[0])

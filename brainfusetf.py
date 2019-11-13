@@ -1,12 +1,30 @@
-import SocketServer
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
+
+import sys
+if sys.version_info < (3, 0):
+    import SocketServer
+else:
+    import socketserver as SocketServer
 import socket
 import threading
 import time
 import os
-import sys
 import numpy as np
 from numpy import *
 import struct
+
+
+def b2s(obj):
+    if isinstance(obj, bytes):
+        for error_handling in ['strict', 'replace', 'ignore']:
+            try:
+                return obj.decode("utf-8", errors=error_handling)
+            except:
+                pass
+        raise RuntimeError('A bytes object was passed to b2s, but not handled')
+    return obj
 
 default_serve_port = 8883
 
@@ -16,7 +34,7 @@ default_serve_port = 8883
 def send_data(sock, path, data):
     payload = '{path}&{shape}&[{data}]'.format(path=path,
                                                shape=data.shape,
-                                               data=','.join(map(lambda x: '%f' % x, data.flatten())))
+                                               data=','.join(['%f' % x for x in data.flatten()]))
     return send_msg(sock, payload)
 
 def send_ask_info(sock, path):
@@ -25,24 +43,29 @@ def send_ask_info(sock, path):
 
 def send_info(sock, path, x_names, y_names):
     payload = '{path}&{x_names}&{y_names}'.format(path=path,
-                                                  x_names=repr(map(str, x_names)),
-                                                  y_names=repr(map(str, y_names)))
+                                                  x_names=repr(list(map(str, x_names))),
+                                                  y_names=repr(list(map(str, y_names))))
     return send_msg(sock, payload)
 
 def send_msg(sock, msg):
     # Prefix each message with a 4-byte length (network byte order)
-    msg = struct.pack('=I', len(msg)) + msg
-    sock.sendall(msg)
+    if sys.version_info < (3, 0):
+        msg = struct.pack('=I', len(msg)) + msg
+        sock.sendall(msg)
+    else:
+        msg = bytes(msg, 'utf-8')
+        msg = struct.pack('=I', len(msg)) + msg
+        sock.sendall(msg)
 
 def parse_data(data):
     try:
-        path, shape, data = data.split('&')
+        path, shape, data = b2s(data).split('&')
     except Exception:
-        raise(Exception('Malformed input data'))
+        raise Exception('Malformed input data')
     return path, np.reshape(eval(data), eval(shape))
 
 def parse_info(data):
-    path, x_names, y_names = data.split('&')
+    path, x_names, y_names = b2s(data).split('&')
     return path, eval(x_names), eval(y_names)
 
 def recv_msg(sock):
@@ -123,13 +146,13 @@ def activateNets(nets, dB):
         nets = {k: OMFITpath(file) for k, file in enumerate(glob.glob(nets))}
     elif not isinstance(nets, (list, tuple)):
         nets = {0: nets}
-    net = nets.values()[0]
+    net = list(nets.values())[0]
 
     with btf_connect(path=net.filename) as btf:
         inputNames, outputNames = btf.info()
     targets = array([dB[k] for k in outputNames]).T
 
-    out_ = empty((len(atleast_1d(dB.values()[0])), len(outputNames), len(nets)))
+    out_ = empty((len(atleast_1d(list(dB.values())[0])), len(outputNames), len(nets)))
     for k, n in enumerate(nets):
         with btf_connect(path=net.filename) as btf:
             out_[:, :, k] = btf.run(dB)

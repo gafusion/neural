@@ -1,3 +1,6 @@
+# file processed by 2to3
+from __future__ import print_function, absolute_import
+from builtins import map, filter, range
 import sys,os,re,numpy
 from collections import OrderedDict
 
@@ -6,7 +9,7 @@ model=os.path.split(dir)[1]
 
 cases=OrderedDict()
 
-print model
+print(model)
 
 if model.startswith('eped1nn'):
     title =  'EPED1-NN'
