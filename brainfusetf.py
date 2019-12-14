@@ -75,7 +75,7 @@ def recv_msg(sock):
         return None
     msglen = struct.unpack('=I', raw_msglen)[0]
     # Read the message data
-    return recvall(sock, msglen)
+    return b2s(recvall(sock, msglen))
 
 def recvall(sock, n):
     # Helper function to recv n bytes or return None if EOF is hit
