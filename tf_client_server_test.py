@@ -5,21 +5,28 @@ import numpy as np
 from brainfusetf import btf_connect
 import time
 
+
 def print_nice(model, input_names, input, output_names, output):
-    for row in range(input.shape[0]):
-        print('=' * 20)
-        print(model)
-        print('=' * 20)
-        print('INPUTS')
-        print('-' * 20)
-        for k, item in enumerate(input_names):
-            print('%s = % g' % (item.ljust(max(list(map(len, input_names)))), input[row, k]))
-        print('-' * 20)
-        print('OUTPUTS')
-        print('-' * 20)
-        for k, item in enumerate(output_names):
-            print('%s = % g' % (item.ljust(max(list(map(len, output_names)))), output[row, k]))
+    print('=' * 20)
+    print(model)
+    print('=' * 20)
+    print('INPUTS')
+    print('-' * 20)
+    for k, item in enumerate(input_names):
+        print('%s = ' % item.ljust(30),end='')
+        for row in range(input.shape[0]):
+            print(' % 9.3f' % input[row, k],end='')
+        print('')
+    print('-' * 20)
+    print('OUTPUTS')
+    print('-' * 20)
+    for k, item in enumerate(output_names):
+        print('%s = ' % item.ljust(30),end='')
+        for row in range(input.shape[0]):
+            print(' % 9.3f' % output[row, k],end='')
+        print('')
     print('')
+
 
 # TGLF-NN example
 model = 'tglfnn/models/2IONS.pb'
@@ -47,7 +54,13 @@ print_nice(model, input_names, input, output_names, output)
 
 # EPED-NN example
 model = 'eped1nn/models/EPED_mb_128_pow_norm_common_30x10.pb'
-input = np.atleast_2d([0.5778, 1.8034, 2.0995, 0.2075, 1.1621, 1.8017, 2, 4.0101, 1.6984, 1.4429])
+input = np.atleast_2d([[2.0, 2.0, 5.3, 0.485, 15.0, 1.8, 2.5, 10., 6.2, 1.5],
+                       [2.0, 2.0, 5.3, 0.485, 15.0, 1.8, 2.5, 10., 6.2, 2.0],
+                       [2.0, 2.0, 5.3, 0.485, 15.0, 1.8, 2.5, 10., 6.2, 2.5],
+                       [2.0, 2.0, 5.3, 0.485, 15.0, 1.8, 2.5, 10., 6.2, 3.0]]
+                      )
+print(type(input))
+print(input.shape)
 
 with btf_connect(path=model) as tf:
     input_names, output_names = tf.info()
@@ -56,4 +69,3 @@ with btf_connect(path=model) as tf:
     output = tf.run(input=input)
 
 print_nice(model, input_names, input, output_names, output)
-
