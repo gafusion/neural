@@ -47,7 +47,7 @@ Run `./compile.sh` script
 TENSORFLOW models
 -----------------
 
-To start one can use the public `brainfusetf` server `gadb-harvest.ddns.net`
+To start one can use the public `brainfusetf` server `gadb-harvest.duckdns.org`
 to serve trained models.
 
 A python can be run with: `tf_client_server_test.py`

@@ -93,7 +93,7 @@ def recvall(sock, n):
 class btf_connect(object):
     def __init__(self, path, host=None, port=None):
         if host is None:
-            host = os.environ.get('BTF_HOST', 'gadb-harvest.ddns.net')
+            host = os.environ.get('BTF_HOST', 'gadb-harvest.duckdns.org')
         if port is None:
             port = int(os.environ.get('BTF_PORT', default_serve_port))
         self.host = host

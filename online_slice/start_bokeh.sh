@@ -21,5 +21,5 @@ models=`ls -d */`
 
 export PATH=/opt/local/Library/Frameworks/Python.framework/Versions/2.7/bin/:$PATH
 
-#bokeh serve $models --allow-websocket-origin gadb-harvest.ddns.net --port 5100
+#bokeh serve $models --allow-websocket-origin gadb-harvest.duckdns.org --port 5100
 bokeh serve $models
